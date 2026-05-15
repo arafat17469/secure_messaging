@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Real-Time Messaging System</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef3fb;
+            color: #111827;
+        }
+
+        .container {
+            width: 1050px;
+            max-width: 95%;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 12px 35px rgba(15, 23, 42, .08);
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 { margin-top: 0; }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        button:hover { opacity: .93; }
+
+        button.secondary { background: #111827; }
+
+        button.tab {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        button.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .hidden { display: none; }
+
+        .status {
+            margin-top: 8px;
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .ok { color: #047857; }
+
+        .small {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .topbar button { max-width: 130px; }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .message-box {
+            min-height: 360px;
+            max-height: 460px;
+            overflow-y: auto;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            background: #f9fafb;
+            padding: 14px;
+        }
+
+        .msg {
+            background: white;
+            border-left: 5px solid #2563eb;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+        }
+
+        .meta {
+            font-size: 13px;
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+
+        .verify {
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .verify span {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            margin-right: 5px;
+            background: #ecfdf5;
+            color: #047857;
+            font-weight: 700;
+        }
+
+        a {
+            color: #2563eb;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        @media (max-width: 760px) {
+            .row { grid-template-columns: 1fr; }
+            .topbar { display: block; }
+            .topbar button { max-width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="card">
+        <h1>Arafat Secure Real-Time Messaging System</h1>
+        <p class="small">
+            Database proof page:
+            <a href="/debug-db" target="_blank">Open Database Security View</a>
+        </p>
+    </div>
+
+    <div id="authSection">
+        <div class="card" style="max-width:480px; margin:0 auto 20px;">
+
+            <div id="loginForm">
+                <h2>Secure Login</h2>
+                <p class="small">Sign in to access your encrypted messaging dashboard.</p>
+
+                <label>Username</label>
+                <input id="loginUsername" placeholder="Enter your username">
+
+                <label>Password</label>
+                <input id="loginPassword" type="password" placeholder="Enter your password">
+
+                <button onclick="loginUser()">Login to Dashboard</button>
+                <p id="loginStatus" class="status"></p>
+
+                <p class="small" style="text-align:center; margin-top:18px;">
+                    Don’t have an account?
+                    <a href="javascript:void(0)" onclick="showRegisterForm()">Create Account</a>
+                </p>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <h2>Create Secure Account</h2>
+                <p class="small">Register to start secure real-time encrypted communication.</p>
+
+                <label>Username</label>
+                <input id="regUsername" placeholder="Enter your username">
+
+                <label>Password</label>
+                <input id="regPassword" type="password" placeholder="Create a strong password">
+
+                <button onclick="registerUser()">Create Account</button>
+                <p id="regStatus" class="status"></p>
+
+                <p class="small" style="text-align:center; margin-top:18px;">
+                    Already have an account?
+                    <a href="javascript:void(0)" onclick="showLoginForm()">Login</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="chatSection" class="hidden">
+
+        <div class="card topbar">
+            <div>
+                <h2 id="loggedUser">Logged in</h2>
+                <p class="small">Use another browser tab, another browser, or incognito window for another user.</p>
+            </div>
+            <button class="secondary" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="row">
+            <div class="card">
+                <h3>Send Secure Message</h3>
+
+                <label>Receiver Username</label>
+                <input id="receiver" placeholder="Receiver username">
+
+                <label>Message</label>
+                <textarea id="message" placeholder="Write message here"></textarea>
+
+                <button onclick="sendMessage()">Send Message</button>
+                <p id="sendStatus" class="status"></p>
+            </div>
+
+            <div class="card">
+                <h3>Registered Users</h3>
+                <div id="usersList" class="small">Loading...</div>
+                <button class="secondary" onclick="loadUsers()">Refresh Users</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="tabs">
+                <button id="inboxTab" class="tab active" onclick="showTab('inbox')">Receive / Inbox</button>
+                <button id="sentTab" class="tab" onclick="showTab('sent')">Sent Messages</button>
+            </div>
+
+            <div id="inboxPanel">
+                <h3>Received Messages</h3>
+                <p class="small">
+                    Received messages are decrypted after AES-GCM authentication and verified using SHA-512 and RSA signature.
+                </p>
+                <div id="inboxBox" class="message-box"></div>
+            </div>
+
+            <div id="sentPanel" class="hidden">
+                <h3>Sent Messages</h3>
+                <p class="small">
+                    Sent message records show sender, receiver, timestamp and encrypted-storage status.
+                </p>
+                <div id="sentBox" class="message-box"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let token = sessionStorage.getItem("token") || "";
+let currentUser = sessionStorage.getItem("username") || "";
+let socket = null;
+
+async function postJSON(url, body) {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+    return {ok: response.ok, data};
+}
+
+async function registerUser() {
+    const username = document.getElementById("regUsername").value.trim();
+    const password = document.getElementById("regPassword").value;
+
+    const {ok, data} = await postJSON("/api/register", {
+        username,
+        password
+    });
+
+    const status = document.getElementById("regStatus");
+    status.className = ok ? "status ok" : "status";
+    status.innerText = data.message || data.error || "Registration failed.";
+
+    if (ok) {
+        document.getElementById("regUsername").value = "";
+        document.getElementById("regPassword").value = "";
+        setTimeout(showLoginForm, 1000);
+    }
+}
+
+async function loginUser() {
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    const {ok, data} = await postJSON("/api/login", {
+        username,
+        password
+    });
+
+    const status = document.getElementById("loginStatus");
+
+    if (ok) {
+        token = data.token;
+        currentUser = data.username;
+
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("username", currentUser);
+
+        status.className = "status ok";
+        status.innerText = "Login successful.";
+
+        showChat();
+    } else {
+        status.className = "status";
+        status.innerText = data.error || "Login failed.";
+    }
+}
+
+function showRegisterForm() {
+    document.getElementById("loginForm").classList.add("hidden");
+    document.getElementById("registerForm").classList.remove("hidden");
+}
+
+function showLoginForm() {
+    document.getElementById("registerForm").classList.add("hidden");
+    document.getElementById("loginForm").classList.remove("hidden");
+}
+
+function showChat() {
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("chatSection").classList.remove("hidden");
+
+    document.getElementById("loggedUser").innerText = "Logged in as: " + currentUser;
+
+    connectSocket();
+    loadUsers();
+    loadInbox();
+    loadSent();
+}
+
+function connectSocket() {
+    if (socket) {
+        socket.disconnect();
+    }
+
+    socket = io();
+
+    socket.on("connect", () => {
+        socket.emit("join", {token});
+    });
+
+    socket.on("receive_message", data => appendInbox(data));
+    socket.on("sent_message", data => appendSent(data));
+
+    socket.on("send_error", data => {
+        const status = document.getElementById("sendStatus");
+        status.className = "status";
+        status.innerText = data.error || "Message sending failed.";
+    });
+
+    socket.on("auth_error", data => {
+        alert(data.error || "Authentication error.");
+        logout();
+    });
+}
+
+async function loadUsers() {
+    const response = await fetch("/api/users");
+    const data = await response.json();
+
+    document.getElementById("usersList").innerHTML =
+        data.users.map(user =>
+            `<div>• ${escapeHTML(user)}${user === currentUser ? " (you)" : ""}</div>`
+        ).join("");
+}
+
+async function loadInbox() {
+    const response = await fetch("/api/inbox", {
+        headers: {"Authorization": "Bearer " + token}
+    });
+
+    if (!response.ok) {
+        return;
+    }
+
+    const data = await response.json();
+
+    document.getElementById("inboxBox").innerHTML = "";
+    data.messages.forEach(appendInbox);
+}
+
+async function loadSent() {
+    const response = await fetch("/api/sent", {
+        headers: {"Authorization": "Bearer " + token}
+    });
+
+    if (!response.ok) {
+        return;
+    }
+
+    const data = await response.json();
+
+    document.getElementById("sentBox").innerHTML = "";
+    data.messages.forEach(appendSent);
+}
+
+function sendMessage() {
+    const receiver = document.getElementById("receiver").value.trim();
+    const message = document.getElementById("message").value;
+    const status = document.getElementById("sendStatus");
+
+    if (!receiver || !message) {
+        status.className = "status";
+        status.innerText = "Receiver and message are required.";
+        return;
+    }
+
+    if (!socket || !socket.connected) {
+        status.className = "status";
+        status.innerText = "Socket is not connected. Please refresh or login again.";
+        return;
+    }
+
+    socket.emit("send_message", {
+        token,
+        receiver,
+        message
+    });
+
+    document.getElementById("message").value = "";
+    status.className = "status ok";
+    status.innerText = "Message sent successfully.";
+}
+
+function appendInbox(data) {
+    const box = document.getElementById("inboxBox");
+    const div = document.createElement("div");
+
+    div.className = "msg";
+
+    div.innerHTML = `
+        <div class="meta">
+            <b>${escapeHTML(data.sender)}</b>
+            →
+            <b>${escapeHTML(data.receiver)}</b>
+            |
+            ${escapeHTML(data.created_at || "")}
+        </div>
+
+        <div>
+            <b>Message:</b>
+            ${escapeHTML(data.decrypted_message || "")}
+        </div>
+
+        <div class="verify">
+            <span>Hash: ${data.hash_ok ? "OK" : "Failed"}</span>
+            <span>Signature: ${data.signature_ok ? "OK" : "Failed"}</span>
+            <span>Status: ${escapeHTML(data.status || "")}</span>
+        </div>
+
+        <p class="small">
+            UUID: ${escapeHTML(data.message_uuid || "")}
+        </p>
+    `;
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+function appendSent(data) {
+    const box = document.getElementById("sentBox");
+    const div = document.createElement("div");
+
+    div.className = "msg";
+
+    div.innerHTML = `
+        <div class="meta">
+            <b>${escapeHTML(data.sender)}</b>
+            →
+            <b>${escapeHTML(data.receiver)}</b>
+            |
+            ${escapeHTML(data.created_at || "")}
+        </div>
+
+        <div>
+            <b>Status:</b> Message encrypted and sent successfully.
+        </div>
+
+        <p class="small">
+            UUID: ${escapeHTML(data.message_uuid || "")}
+        </p>
+    `;
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+function showTab(tab) {
+    const inbox = tab === "inbox";
+
+    document.getElementById("inboxPanel").classList.toggle("hidden", !inbox);
+    document.getElementById("sentPanel").classList.toggle("hidden", inbox);
+
+    document.getElementById("inboxTab").classList.toggle("active", inbox);
+    document.getElementById("sentTab").classList.toggle("active", !inbox);
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    }[c]));
+}
+
+function logout() {
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("username");
+
+    if (socket) {
+        socket.disconnect();
+    }
+
+    location.reload();
+}
+
+if (token && currentUser) {
+    showChat();
+}
+</script>
+</body>
+</html>
