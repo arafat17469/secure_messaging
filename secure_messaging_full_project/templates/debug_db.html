@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Database Security View</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 28px;
+            background: #eef3fb;
+            color: #111827;
+            font-family: Arial, sans-serif;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
+            margin-bottom: 22px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        th {
+            background: #e5e7eb;
+        }
+
+        code {
+            word-break: break-all;
+            font-size: 12px;
+        }
+
+        .safe {
+            color: #047857;
+            font-weight: 700;
+        }
+
+        .warn {
+            color: #92400e;
+            font-weight: 700;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        a {
+            color: #2563eb;
+            font-weight: 700;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h1>Database Security View</h1>
+
+    <p>
+        This page is for project demonstration. It proves that user passwords are stored as bcrypt hashes,
+        messages are stored as encrypted ciphertext, and RSA private keys are not stored in the database.
+    </p>
+
+    <p>
+        <a href="/">Back to Main App</a>
+    </p>
+
+    <button onclick="loadDatabaseView()">Refresh Database View</button>
+</div>
+
+<div class="card">
+    <h2>Users Table</h2>
+
+    <p class="safe">
+        Plaintext password is not stored. bcrypt password hash is stored.
+    </p>
+
+    <p class="safe">
+        RSA private key is not stored in the database. Only RSA public key is stored.
+    </p>
+
+    <p class="warn">
+        username_display is kept for login and receiver selection.
+        username_hash is stored to demonstrate identity hashing.
+    </p>
+
+    <div id="usersTable" class="table-wrap"></div>
+</div>
+
+<div class="card">
+    <h2>Messages Table</h2>
+
+    <p class="safe">
+        Plaintext messages are not stored. Only encrypted ciphertext, nonce, AES tag,
+        SHA-512 hash, RSA signature, and UUID are stored.
+    </p>
+
+    <div id="messagesTable" class="table-wrap"></div>
+</div>
+
+<script>
+async function loadDatabaseView() {
+    const usersResponse = await fetch("/api/debug/users");
+    const messagesResponse = await fetch("/api/debug/messages");
+
+    const usersData = await usersResponse.json();
+    const messagesData = await messagesResponse.json();
+
+    renderUsers(usersData.users || []);
+    renderMessages(messagesData.messages || []);
+}
+
+function renderUsers(users) {
+    if (users.length === 0) {
+        document.getElementById("usersTable").innerHTML = "<p>No users registered yet.</p>";
+        return;
+    }
+
+    document.getElementById("usersTable").innerHTML = `
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Username Display</th>
+                <th>Username Hash</th>
+                <th>bcrypt Password Hash</th>
+                <th>Failed Attempts</th>
+                <th>Locked Until</th>
+                <th>RSA Public Key Start</th>
+                <th>Private Key Storage Status</th>
+            </tr>
+
+            ${users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${escapeHTML(user.username_display)}</td>
+                    <td><code>${escapeHTML(user.username_hash)}</code></td>
+                    <td><code>${escapeHTML(user.password_hash)}</code></td>
+                    <td>${escapeHTML(user.failed_attempts)}</td>
+                    <td>${escapeHTML(user.locked_until || "None")}</td>
+                    <td><code>${escapeHTML(user.rsa_public_key_start)}</code></td>
+                    <td class="safe">${escapeHTML(user.private_key_storage_status)}</td>
+                </tr>
+            `).join("")}
+        </table>
+    `;
+}
+
+function renderMessages(messages) {
+    if (messages.length === 0) {
+        document.getElementById("messagesTable").innerHTML = "<p>No messages sent yet.</p>";
+        return;
+    }
+
+    document.getElementById("messagesTable").innerHTML = `
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Message UUID</th>
+                <th>Sender</th>
+                <th>Receiver</th>
+                <th>Sender Hash</th>
+                <th>Receiver Hash</th>
+                <th>Encrypted Message</th>
+                <th>Nonce</th>
+                <th>AES Tag</th>
+                <th>SHA-512 Hash</th>
+                <th>Digital Signature Start</th>
+                <th>Created At</th>
+            </tr>
+
+            ${messages.map(msg => `
+                <tr>
+                    <td>${msg.id}</td>
+                    <td><code>${escapeHTML(msg.message_uuid)}</code></td>
+                    <td>${escapeHTML(msg.sender_display)}</td>
+                    <td>${escapeHTML(msg.receiver_display)}</td>
+                    <td><code>${escapeHTML(msg.sender_hash)}</code></td>
+                    <td><code>${escapeHTML(msg.receiver_hash)}</code></td>
+                    <td><code>${escapeHTML(msg.encrypted_message)}</code></td>
+                    <td><code>${escapeHTML(msg.nonce)}</code></td>
+                    <td><code>${escapeHTML(msg.aes_tag)}</code></td>
+                    <td><code>${escapeHTML(msg.plaintext_sha512_hash)}</code></td>
+                    <td><code>${escapeHTML(msg.digital_signature_start)}</code></td>
+                    <td>${escapeHTML(msg.created_at)}</td>
+                </tr>
+            `).join("")}
+        </table>
+    `;
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    }[c]));
+}
+
+loadDatabaseView();
+</script>
+
+</body>
+</html>
