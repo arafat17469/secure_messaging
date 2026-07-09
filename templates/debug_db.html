@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Database Security View</title>
+    <title>Badri 313 - Database Security View</title>
 
     <style>
         body {
@@ -77,7 +77,7 @@
 <body>
 
 <div class="card">
-    <h1>Database Security View</h1>
+    <h1>Badri 313 Database Security View</h1>
 
     <p>
         This page is for project demonstration. It proves that user passwords are stored as bcrypt hashes,
@@ -121,10 +121,29 @@
     <div id="messagesTable" class="table-wrap"></div>
 </div>
 
+<p style="text-align:center; color:#6b7280; font-size:12px;">
+    &copy; 2026 Arafat Rahman. All rights reserved.
+</p>
+
 <script>
 async function loadDatabaseView() {
-    const usersResponse = await fetch("/api/debug/users");
-    const messagesResponse = await fetch("/api/debug/messages");
+    const token = sessionStorage.getItem("token") || "";
+    const headers = {"Authorization": "Bearer " + token};
+
+    if (!token) {
+        document.getElementById("usersTable").innerHTML = "<p>Please login first, then open this page again.</p>";
+        document.getElementById("messagesTable").innerHTML = "<p>Unauthorized.</p>";
+        return;
+    }
+
+    const usersResponse = await fetch("/api/debug/users", {headers});
+    const messagesResponse = await fetch("/api/debug/messages", {headers});
+
+    if (!usersResponse.ok || !messagesResponse.ok) {
+        document.getElementById("usersTable").innerHTML = "<p>Unauthorized or session expired. Please login again.</p>";
+        document.getElementById("messagesTable").innerHTML = "<p>Unauthorized or session expired.</p>";
+        return;
+    }
 
     const usersData = await usersResponse.json();
     const messagesData = await messagesResponse.json();
