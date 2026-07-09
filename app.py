@@ -122,7 +122,7 @@ LOCK_MINUTES = int(os.getenv("LOCK_MINUTES", 5))
 JWT_EXPIRE_HOURS = int(os.getenv("JWT_EXPIRE_HOURS", 6))
 JWT_ISSUER = os.getenv("JWT_ISSUER", "secure-messaging")
 JWT_AUDIENCE = os.getenv("JWT_AUDIENCE", "secure-messaging-users")
-BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", 12))
+BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", 10))
 MIN_PASSWORD_LENGTH = int(os.getenv("MIN_PASSWORD_LENGTH", 8))
 PASSWORD_REQUIRE_COMPLEXITY = (
     os.getenv("PASSWORD_REQUIRE_COMPLEXITY", "True").lower() == "true"
@@ -563,7 +563,7 @@ def register():
     db.session.commit()
 
     return jsonify({
-        "message": "Registration successful. RSA private key is not stored in database. Now login."
+        "message": "Account created successfully. You can login now."
     }), 201
 
 

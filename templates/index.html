@@ -870,6 +870,19 @@ function apiUrl(path) {
   return API_BASE + path;
 }
 
+function defaultBackendBase() {
+  if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+    const isFlaskPort = window.location.port === "5000" || window.location.port === "5001";
+    const isLocalHost = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+
+    if (isFlaskPort && isLocalHost) {
+      return window.location.origin;
+    }
+  }
+
+  return "http://127.0.0.1:5000";
+}
+
 function updateBackendStatus(message, ok = true) {
   console.debug(message, ok ? "ok" : "error");
 }
@@ -958,14 +971,10 @@ function showToast(message, ok = true) {
 }
 
 async function postJSON(url, body) {
-  if (!await ensureBackend()) {
-    return {
-      ok: false,
-      status: 0,
-      data: {
-        error: "Server is not connected. Please start the app and refresh the page."
-      }
-    };
+  await ensureBackend();
+
+  if (!API_BASE) {
+    API_BASE = defaultBackendBase();
   }
 
   let response;
@@ -980,7 +989,7 @@ async function postJSON(url, body) {
     return {
       ok: false,
       status: 0,
-      data: {error: "Connection failed. Please restart the app and refresh the page."}
+      data: {error: "Could not create account right now. Please refresh and try again."}
     };
   }
 
@@ -998,14 +1007,10 @@ async function postJSON(url, body) {
 }
 
 async function authFetch(url, options = {}) {
-  if (!await ensureBackend()) {
-    return {
-      ok: false,
-      status: 0,
-      json: async () => ({
-        error: "Server is not connected."
-      })
-    };
+  await ensureBackend();
+
+  if (!API_BASE) {
+    API_BASE = defaultBackendBase();
   }
 
   const headers = options.headers || {};
@@ -1137,6 +1142,7 @@ async function registerUser() {
   const password = document.getElementById("regPassword").value;
   const confirmPassword = document.getElementById("regConfirmPassword").value;
   const status = document.getElementById("regStatus");
+  const registerButton = document.getElementById("registerButton");
 
   if (!username || !password || !confirmPassword) {
     status.className = "status";
@@ -1164,15 +1170,22 @@ async function registerUser() {
     return;
   }
 
+  status.className = "status ok";
+  status.textContent = "Creating account...";
+  registerButton.disabled = true;
+  registerButton.textContent = "Creating...";
+
   const {ok, data} = await postJSON("/api/register", {username, password});
   status.className = ok ? "status ok" : "status";
   status.textContent = data.message || data.error || "Registration failed. Please refresh and try again.";
+  registerButton.disabled = false;
+  registerButton.textContent = "Create Account";
 
   if (ok) {
     document.getElementById("regUsername").value = "";
     document.getElementById("regPassword").value = "";
     document.getElementById("regConfirmPassword").value = "";
-    setTimeout(showLoginForm, 900);
+    setTimeout(showLoginForm, 1500);
   }
 }
 
@@ -1237,7 +1250,7 @@ async function connectSocket() {
   if (socket) socket.disconnect();
 
   if (!await ensureBackend()) {
-    showToast("Server is not connected. Please restart the app.", false);
+    showToast("Unable to open realtime chat. Please refresh the page.", false);
     return;
   }
 
