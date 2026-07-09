@@ -718,17 +718,17 @@
 
           <div class="password-tools">
             <label>
-              <input id="showLoginPassword" type="checkbox" onchange="toggleLoginPassword()">
+              <input id="showLoginPassword" type="checkbox">
               Show password
             </label>
           </div>
 
-          <button class="primary-btn" type="button" onclick="loginUser()">Login</button>
+          <button id="loginButton" class="primary-btn" type="button">Login</button>
           <div id="loginStatus" class="status"></div>
 
           <div class="switch-text">
             New here?
-            <button class="link-btn" type="button" onclick="showRegisterForm()">Create account</button>
+            <button id="showRegisterButton" class="link-btn" type="button">Create account</button>
           </div>
 
         </div>
@@ -754,17 +754,17 @@
 
           <div class="password-tools">
             <label>
-              <input id="showRegisterPasswords" type="checkbox" onchange="toggleRegisterPasswords()">
+              <input id="showRegisterPasswords" type="checkbox">
               Show passwords
             </label>
           </div>
 
-          <button class="primary-btn" type="button" onclick="registerUser()">Create Account</button>
+          <button id="registerButton" class="primary-btn" type="button">Create Account</button>
           <div id="regStatus" class="status"></div>
 
           <div class="switch-text">
             Already registered?
-            <button class="link-btn" type="button" onclick="showLoginForm()">Login</button>
+            <button id="showLoginButton" class="link-btn" type="button">Login</button>
           </div>
 
         </div>
@@ -784,15 +784,15 @@
         </div>
 
         <div class="icon-row">
-          <button class="icon-btn" type="button" title="Refresh" onclick="refreshAll()">R</button>
-          <button class="pill-btn" type="button" onclick="logout()">Logout</button>
+          <button id="refreshButton" class="icon-btn" type="button" title="Refresh">R</button>
+          <button id="logoutButton" class="pill-btn" type="button">Logout</button>
         </div>
       </header>
 
       <div class="search-area">
         <div class="search-box">
           <span>Search</span>
-          <input id="searchUser" type="text" placeholder="Search or start a new chat" oninput="renderUsersList()">
+          <input id="searchUser" type="text" placeholder="Search or start a new chat">
         </div>
       </div>
 
@@ -810,7 +810,7 @@
     <section id="conversation" class="conversation hidden">
       <header class="chat-header">
         <div class="chat-person">
-          <button class="icon-btn back-btn" type="button" onclick="closeConversation()" title="Back">&lt;</button>
+          <button id="backButton" class="icon-btn back-btn" type="button" title="Back">&lt;</button>
           <div id="selectedAvatar" class="avatar">?</div>
           <div class="chat-title">
             <h2 id="selectedUserName">Select a chat</h2>
@@ -819,8 +819,8 @@
         </div>
 
         <div class="icon-row">
-          <button class="icon-btn" type="button" title="Refresh messages" onclick="refreshMessages()">R</button>
-          <button class="icon-btn" type="button" title="Security info" onclick="showSecurityToast()">S</button>
+          <button id="refreshMessagesButton" class="icon-btn" type="button" title="Refresh messages">R</button>
+          <button id="securityInfoButton" class="icon-btn" type="button" title="Security info">S</button>
         </div>
       </header>
 
@@ -833,7 +833,7 @@
         </div>
       </div>
 
-      <form class="composer" onsubmit="sendMessage(event)">
+      <form id="messageForm" class="composer">
         <button class="icon-btn" type="button" title="Attachment">+</button>
         <input id="messageInput" type="text" placeholder="Select a chat first" maxlength="2000" disabled>
         <button id="sendButton" class="send-btn" type="submit" title="Send" disabled>&gt;</button>
@@ -1061,15 +1061,75 @@ function setupPasswordToggles() {
 
   if (loginToggle) {
     loginToggle.addEventListener("change", toggleLoginPassword);
-    loginToggle.addEventListener("click", toggleLoginPassword);
     toggleLoginPassword();
   }
 
   if (registerToggle) {
     registerToggle.addEventListener("change", toggleRegisterPasswords);
-    registerToggle.addEventListener("click", toggleRegisterPasswords);
     toggleRegisterPasswords();
   }
+}
+
+function bindClick(id, handler) {
+  const element = document.getElementById(id);
+  if (!element) return;
+  element.addEventListener("click", event => {
+    event.preventDefault();
+    handler(event);
+  });
+}
+
+function setupUIEventHandlers() {
+  bindClick("showRegisterButton", showRegisterForm);
+  bindClick("showLoginButton", showLoginForm);
+  bindClick("loginButton", loginUser);
+  bindClick("registerButton", registerUser);
+  bindClick("refreshButton", refreshAll);
+  bindClick("logoutButton", logout);
+  bindClick("backButton", closeConversation);
+  bindClick("refreshMessagesButton", refreshMessages);
+  bindClick("securityInfoButton", showSecurityToast);
+
+  const searchUser = document.getElementById("searchUser");
+  if (searchUser) {
+    searchUser.addEventListener("input", renderUsersList);
+  }
+
+  const chatList = document.getElementById("chatList");
+  if (chatList) {
+    chatList.addEventListener("click", event => {
+      const item = event.target.closest(".chat-item");
+      if (!item) return;
+      selectUserFromElement(item);
+    });
+  }
+
+  const messageForm = document.getElementById("messageForm");
+  if (messageForm) {
+    messageForm.addEventListener("submit", sendMessage);
+  }
+
+  ["loginUsername", "loginPassword"].forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        loginUser();
+      }
+    });
+  });
+
+  ["regUsername", "regPassword", "regConfirmPassword"].forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        registerUser();
+      }
+    });
+  });
 }
 
 function validateUsername(username) {
@@ -1191,7 +1251,7 @@ function showApp() {
   refreshAll();
 }
 
-function connectSocket() {
+async function connectSocket() {
   if (socket) socket.disconnect();
 
   if (!await ensureBackend()) {
@@ -1317,7 +1377,7 @@ function renderUsersList() {
     const last = getLastMessageWithUser(user);
     const active = user === selectedUser ? "active" : "";
     return `
-      <button class="chat-item ${active}" type="button" data-user="${escapeHTML(user)}" onclick="selectUserFromElement(this)">
+      <button class="chat-item ${active}" type="button" data-user="${escapeHTML(user)}">
         <div class="avatar small" style="background:${avatarColor(user)}">${escapeHTML(initials(user))}</div>
         <div class="chat-meta">
           <div class="chat-line">
@@ -1534,6 +1594,7 @@ function getLastMessageWithUser(user) {
   };
 }
 
+setupUIEventHandlers();
 setupPasswordToggles();
 ensureBackend();
 
