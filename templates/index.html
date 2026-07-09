@@ -202,19 +202,6 @@
       color: var(--green-dark);
     }
 
-    .backend-status {
-      margin: 12px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
-      line-height: 1.4;
-    }
-
-    .backend-status.error {
-      color: var(--danger);
-      font-weight: 700;
-    }
-
     .switch-text {
       margin-top: 18px;
       color: var(--muted);
@@ -700,11 +687,10 @@
     <section id="authSection" class="auth-screen">
       <div class="auth-card">
         <div class="brand-mark">313</div>
-        <div id="backendStatus" class="backend-status">Checking Flask backend...</div>
 
         <div id="loginForm">
           <h1>Badri 313</h1>
-          <p>Sign in to your encrypted real-time messaging workspace.</p>
+          <p>Sign in and start secure real-time messaging.</p>
 
           <div class="field">
             <label for="loginUsername">Username</label>
@@ -735,7 +721,7 @@
 
         <div id="registerForm" class="hidden">
           <h1>Create Account</h1>
-          <p>Use a strong password. New accounts generate an RSA key pair for signing.</p>
+          <p>Create your Badri 313 account with a strong password.</p>
 
           <div class="field">
             <label for="regUsername">Username</label>
@@ -885,11 +871,7 @@ function apiUrl(path) {
 }
 
 function updateBackendStatus(message, ok = true) {
-  const status = document.getElementById("backendStatus");
-  if (!status) return;
-
-  status.textContent = message;
-  status.classList.toggle("error", !ok);
+  console.debug(message, ok ? "ok" : "error");
 }
 
 async function ensureBackend() {
@@ -906,7 +888,7 @@ async function ensureBackend() {
 
       API_BASE = base;
       backendReady = true;
-      updateBackendStatus("Backend connected: " + base);
+      updateBackendStatus("Server connected: " + base);
       return true;
     } catch (error) {
       // Try the next candidate.
@@ -914,7 +896,7 @@ async function ensureBackend() {
   }
 
   updateBackendStatus(
-    "Backend not running. Run python app.py, then open http://127.0.0.1:5000.",
+    "Server connection unavailable.",
     false
   );
   return false;
@@ -981,7 +963,7 @@ async function postJSON(url, body) {
       ok: false,
       status: 0,
       data: {
-        error: "Cannot connect to Flask backend. Run python app.py and open http://127.0.0.1:5000."
+        error: "Server is not connected. Please start the app and refresh the page."
       }
     };
   }
@@ -998,7 +980,7 @@ async function postJSON(url, body) {
     return {
       ok: false,
       status: 0,
-      data: {error: "Cannot connect to server. Please make sure the app is running."}
+      data: {error: "Connection failed. Please restart the app and refresh the page."}
     };
   }
 
@@ -1006,9 +988,9 @@ async function postJSON(url, body) {
 
   if (!response.ok && !data.error && !data.message) {
     if (response.status === 404) {
-      data.error = "API route not found. Restart Flask from this project folder and use http://127.0.0.1:5000.";
+      data.error = "Server route was not found. Please restart the app and refresh.";
     } else {
-      data.error = "Server returned HTTP " + response.status + ". Check the Flask terminal for details.";
+      data.error = "Something went wrong. Please refresh and try again.";
     }
   }
 
@@ -1021,7 +1003,7 @@ async function authFetch(url, options = {}) {
       ok: false,
       status: 0,
       json: async () => ({
-        error: "Cannot connect to Flask backend."
+        error: "Server is not connected."
       })
     };
   }
@@ -1184,7 +1166,7 @@ async function registerUser() {
 
   const {ok, data} = await postJSON("/api/register", {username, password});
   status.className = ok ? "status ok" : "status";
-  status.textContent = data.message || data.error || "Registration failed. Please check the Flask terminal.";
+  status.textContent = data.message || data.error || "Registration failed. Please refresh and try again.";
 
   if (ok) {
     document.getElementById("regUsername").value = "";
@@ -1255,7 +1237,7 @@ async function connectSocket() {
   if (socket) socket.disconnect();
 
   if (!await ensureBackend()) {
-    showToast("Backend is not running. Start Flask first.", false);
+    showToast("Server is not connected. Please restart the app.", false);
     return;
   }
 

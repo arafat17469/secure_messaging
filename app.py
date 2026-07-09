@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, join_room, emit
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
 from Crypto.Cipher import AES
@@ -109,6 +110,10 @@ socketio = SocketIO(
     async_mode="threading"
 )
 
+# Apply CORS to all regular Flask routes
+CORS(app, origins=CORS_ALLOWED_ORIGINS, supports_credentials=True)
+
+
 # AES-256 key derived from SECRET_KEY.
 AES_KEY = hashlib.sha256(app.config["SECRET_KEY"].encode("utf-8")).digest()
 
@@ -212,18 +217,6 @@ def reject_large_json_payloads():
 
 @app.after_request
 def add_security_headers(response):
-    origin = request.headers.get("Origin")
-
-    if CORS_ALLOWED_ORIGINS == "*" and origin:
-        response.headers["Access-Control-Allow-Origin"] = origin
-    elif origin and origin in CORS_ALLOWED_ORIGINS:
-        response.headers["Access-Control-Allow-Origin"] = origin
-
-    if origin:
-        response.headers["Vary"] = "Origin"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
