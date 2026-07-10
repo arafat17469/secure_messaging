@@ -16,10 +16,11 @@
       --muted: #667781;
       --green: #00a884;
       --green-dark: #008069;
+      --green-soft: #e7f7f2;
       --bubble-out: #d9fdd3;
       --bubble-in: #ffffff;
       --danger: #d92d20;
-      --shadow: 0 18px 45px rgba(11, 20, 26, 0.18);
+      --shadow: 0 24px 70px rgba(11, 20, 26, 0.18);
     }
 
     * {
@@ -28,15 +29,17 @@
 
     body {
       margin: 0;
-      min-height: 100vh;
-      background:
-        linear-gradient(180deg, #00a884 0 128px, var(--app-bg) 128px 100%);
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      background: linear-gradient(145deg, #00a884 0 17%, #dce5e1 17% 100%);
       color: var(--text);
       font-family: "Segoe UI", Arial, sans-serif;
     }
 
     button,
-    input {
+    input,
+    textarea {
       font: inherit;
     }
 
@@ -45,19 +48,41 @@
       cursor: pointer;
     }
 
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    a:focus-visible {
+      outline: 3px solid rgba(0, 128, 105, 0.35);
+      outline-offset: 2px;
+    }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
     .hidden {
       display: none !important;
     }
 
     .app-shell {
-      width: min(1440px, calc(100vw - 36px));
-      height: min(920px, calc(100vh - 36px));
-      margin: 18px auto;
+      width: 100vw;
+      height: 100dvh;
+      margin: 0;
       background: var(--panel);
       display: grid;
       grid-template-columns: 390px minmax(0, 1fr);
       overflow: hidden;
-      box-shadow: var(--shadow);
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
     }
 
     .auth-screen {
@@ -68,14 +93,16 @@
       background:
         radial-gradient(circle at top left, rgba(0, 168, 132, 0.18), transparent 30%),
         var(--panel-soft);
+      overflow-y: auto;
     }
 
     .auth-card {
       width: min(440px, 100%);
       background: var(--panel);
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 14px 36px rgba(11, 20, 26, 0.12);
+      border: 1px solid rgba(16, 42, 36, 0.08);
+      border-radius: 18px;
+      padding: 34px;
+      box-shadow: 0 20px 50px rgba(11, 20, 26, 0.12);
     }
 
     .brand-mark {
@@ -224,15 +251,15 @@
     .sidebar {
       min-width: 0;
       border-right: 1px solid var(--line);
-      background: var(--panel);
+      background: #fbfcfc;
       display: flex;
       flex-direction: column;
     }
 
     .topbar {
-      height: 62px;
+      height: 68px;
       padding: 10px 16px;
-      background: var(--panel-soft);
+      background: rgba(255, 255, 255, 0.94);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -245,6 +272,9 @@
       align-items: center;
       gap: 12px;
       min-width: 0;
+      padding: 0;
+      background: transparent;
+      text-align: left;
     }
 
     .avatar {
@@ -258,6 +288,19 @@
       font-weight: 800;
       flex: 0 0 auto;
       text-transform: uppercase;
+      position: relative;
+    }
+
+    .avatar.online::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--panel-soft);
+      border-radius: 50%;
+      background: var(--green);
     }
 
     .avatar.small {
@@ -307,6 +350,19 @@
       font-weight: 800;
     }
 
+    .icon-btn svg,
+    .send-btn svg,
+    .search-icon {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
     .icon-btn:hover {
       background: #e3e7ea;
     }
@@ -323,8 +379,8 @@
     }
 
     .search-area {
-      padding: 10px 12px;
-      background: var(--panel);
+      padding: 12px;
+      background: #fbfcfc;
       border-bottom: 1px solid #edf0f2;
     }
 
@@ -333,8 +389,9 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      border-radius: 8px;
-      background: var(--panel-soft);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: #eef2f3;
       padding: 0 14px;
       color: var(--muted);
     }
@@ -347,52 +404,45 @@
       color: var(--text);
     }
 
-    .security-card {
-      margin: 10px 12px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #e7fce3;
-      color: #1f5f4b;
-      font-size: 12px;
-      line-height: 1.5;
+    .search-box:focus-within {
+      border-color: rgba(0, 128, 105, 0.42);
+      background: var(--panel);
+      box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.1);
     }
 
-    .security-card b {
-      color: #0b4f3f;
-    }
-
-    .security-card a {
-      display: inline-block;
-      margin-top: 8px;
-      color: var(--green-dark);
-      font-weight: 800;
-      text-decoration: none;
+    .search-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
     }
 
     .chat-list {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
+      padding: 8px;
     }
 
     .chat-item {
       width: 100%;
-      height: 72px;
-      padding: 0 14px;
+      min-height: 72px;
+      margin: 2px 0;
+      padding: 0 12px;
       display: flex;
       align-items: center;
       gap: 12px;
-      background: var(--panel);
+      border-radius: 12px;
+      background: transparent;
       text-align: left;
     }
 
     .chat-item:hover,
     .chat-item.active {
-      background: #f5f6f6;
+      background: #edf5f2;
     }
 
     .chat-item.active {
-      box-shadow: inset 4px 0 0 var(--green);
+      box-shadow: inset 3px 0 0 var(--green);
     }
 
     .chat-meta {
@@ -401,7 +451,7 @@
       height: 100%;
       display: grid;
       align-content: center;
-      border-bottom: 1px solid #edf0f2;
+      border-bottom: 0;
     }
 
     .chat-line {
@@ -435,6 +485,34 @@
       font-size: 13px;
     }
 
+    .chat-preview-line {
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .chat-preview-line .chat-preview {
+      flex: 1;
+      min-width: 0;
+      margin-top: 0;
+    }
+
+    .unread-badge {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      background: var(--green);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
     .empty-list {
       padding: 28px 18px;
       color: var(--muted);
@@ -448,14 +526,14 @@
       display: flex;
       flex-direction: column;
       background:
-        linear-gradient(rgba(239, 234, 226, 0.92), rgba(239, 234, 226, 0.92)),
+        linear-gradient(rgba(240, 246, 244, 0.94), rgba(240, 246, 244, 0.94)),
         repeating-linear-gradient(45deg, transparent 0 16px, rgba(0, 0, 0, 0.02) 16px 18px);
     }
 
     .chat-header {
-      height: 62px;
+      height: 68px;
       padding: 10px 16px;
-      background: var(--panel-soft);
+      background: rgba(255, 255, 255, 0.94);
       border-bottom: 1px solid var(--line);
       display: flex;
       align-items: center;
@@ -478,14 +556,14 @@
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      padding: 24px clamp(14px, 4vw, 64px);
+      padding: 22px clamp(16px, 4vw, 64px);
     }
 
     .encryption-banner {
       width: min(560px, 100%);
       margin: 0 auto 20px;
       padding: 10px 14px;
-      border-radius: 8px;
+      border-radius: 14px;
       background: #fff3cd;
       color: #6c4d00;
       text-align: center;
@@ -497,7 +575,7 @@
       width: fit-content;
       margin: 14px auto;
       padding: 6px 12px;
-      border-radius: 8px;
+      border-radius: 14px;
       background: rgba(255, 255, 255, 0.8);
       color: var(--muted);
       font-size: 12px;
@@ -506,7 +584,7 @@
 
     .bubble-row {
       display: flex;
-      margin: 4px 0;
+      margin: 3px 0;
       clear: both;
     }
 
@@ -515,14 +593,19 @@
     }
 
     .bubble {
-      max-width: min(680px, 72%);
-      padding: 8px 10px 6px;
-      border-radius: 8px;
+      width: fit-content;
+      max-width: min(420px, 72%);
+      min-height: 0;
+      height: auto;
+      padding: 10px 12px 7px;
+      border-radius: 10px;
       background: var(--bubble-in);
-      box-shadow: 0 1px 1px rgba(11, 20, 26, 0.13);
+      box-shadow: 0 1px 2px rgba(11, 20, 26, 0.13);
       position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
       word-break: break-word;
-      white-space: pre-wrap;
       line-height: 1.42;
       font-size: 14px;
     }
@@ -532,31 +615,44 @@
     }
 
     .bubble-name {
-      margin-bottom: 3px;
       color: var(--green-dark);
       font-size: 12px;
       font-weight: 800;
     }
 
+    .bubble-text {
+      white-space: pre-wrap;
+    }
+
     .bubble-footer {
-      margin-top: 3px;
+      margin-top: auto;
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      flex-wrap: wrap;
       gap: 6px;
       color: var(--muted);
       font-size: 11px;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
-    .verify-line {
-      margin-top: 6px;
-      display: flex;
-      flex-wrap: wrap;
+    #securitySummary,
+    .security-profile {
+      display: none !important;
+    }
+
+    .bubble-status {
+      display: inline-flex;
+      align-items: center;
       gap: 4px;
     }
 
     .verify-chip {
-      padding: 2px 6px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 16px;
+      padding: 1px 6px;
       border-radius: 999px;
       background: rgba(0, 168, 132, 0.12);
       color: #087d64;
@@ -567,6 +663,49 @@
     .verify-chip.warn {
       background: #fdecec;
       color: var(--danger);
+    }
+
+    .verify-chip.pending {
+      background: rgba(84, 101, 111, 0.12);
+      color: #54656f;
+    }
+
+    .bubble.pending {
+      opacity: 0.78;
+    }
+
+    .bubble.failed {
+      box-shadow: 0 0 0 1px rgba(217, 45, 32, 0.32), 0 1px 1px rgba(11, 20, 26, 0.13);
+    }
+
+    .quarantine {
+      min-width: min(320px, 70vw);
+      padding: 10px;
+      border: 1px solid rgba(217, 45, 32, 0.28);
+      border-radius: 7px;
+      background: #fff7f6;
+      color: #7a271a;
+    }
+
+    .quarantine strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .quarantine span {
+      color: #912018;
+      font-size: 12px;
+    }
+
+    .retry-message-btn {
+      margin-left: 4px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(217, 45, 32, 0.1);
+      color: var(--danger);
+      font-size: 11px;
+      font-weight: 800;
     }
 
     .empty-chat {
@@ -595,23 +734,33 @@
     .composer {
       min-height: 64px;
       padding: 10px 16px;
-      background: var(--panel-soft);
+      background: rgba(255, 255, 255, 0.94);
       display: flex;
       align-items: center;
       gap: 10px;
       border-top: 1px solid var(--line);
     }
 
-    .composer input {
+    .composer textarea {
       flex: 1;
-      height: 44px;
+      min-height: 44px;
+      max-height: 132px;
       min-width: 0;
       border: 0;
       outline: 0;
-      border-radius: 8px;
+      border: 1px solid #e6ecea;
+      border-radius: 12px;
       background: var(--panel);
-      padding: 0 14px;
+      padding: 11px 14px;
       color: var(--text);
+      line-height: 1.4;
+      resize: none;
+      overflow-y: auto;
+    }
+
+    .composer textarea:disabled {
+      background: #e9edef;
+      color: var(--muted);
     }
 
     .send-btn {
@@ -622,11 +771,374 @@
       color: white;
       font-size: 18px;
       font-weight: 900;
+      box-shadow: 0 6px 14px rgba(0, 128, 105, 0.24);
+    }
+
+    .send-btn:not(:disabled):hover {
+      background: #006e5b;
+      transform: translateY(-1px);
     }
 
     .send-btn:disabled {
       opacity: 0.45;
       cursor: not-allowed;
+    }
+
+    .composer-tool {
+      flex: 0 0 auto;
+    }
+
+    .attachment-draft {
+      min-width: 0;
+      max-width: 220px;
+      height: 38px;
+      padding: 0 8px 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-soft);
+      color: var(--green-dark);
+      font-size: 12px;
+    }
+
+    .attachment-draft span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .attachment-draft button {
+      flex: 0 0 auto;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.08);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .message-attachment {
+      width: min(320px, 62vw);
+      overflow: hidden;
+      border: 1px solid rgba(17, 27, 33, 0.1);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .message-attachment img,
+    .message-attachment video {
+      display: block;
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      background: #111;
+    }
+
+    .message-attachment audio {
+      display: block;
+      width: 100%;
+      min-width: 260px;
+    }
+
+    .attachment-file {
+      width: 100%;
+      min-height: 54px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .attachment-file span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .unsend-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      background: transparent;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .unsent-text {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(11, 20, 26, 0.44);
+    }
+
+    .settings-drawer {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 71;
+      width: min(390px, 100vw);
+      background: #151717;
+      color: #f5f7f6;
+      box-shadow: 12px 0 34px rgba(0, 0, 0, 0.28);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-header {
+      min-height: 64px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #303333;
+    }
+
+    .settings-header .icon-btn {
+      color: #f5f7f6;
+    }
+
+    .settings-header h2 {
+      margin: 0;
+      font-size: 19px;
+    }
+
+    .settings-scroll {
+      min-height: 0;
+      overflow-y: auto;
+      padding: 12px 16px 28px;
+    }
+
+    .settings-search {
+      height: 42px;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+      background: #2c2f2f;
+      color: #aeb4b2;
+    }
+
+    .settings-search svg {
+      width: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .settings-search input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: white;
+    }
+
+    .profile-editor {
+      padding: 28px 8px 22px;
+      text-align: center;
+      border-bottom: 1px solid #303333;
+    }
+
+    .profile-avatar {
+      width: 112px;
+      height: 112px;
+      margin: 0 auto;
+      background-position: center;
+      background-size: cover;
+      font-size: 30px;
+    }
+
+    .profile-editor h3 {
+      margin: 14px 0 3px;
+      font-size: 18px;
+    }
+
+    .profile-editor p {
+      margin: 0 0 14px;
+      color: #9da4a1;
+      font-size: 13px;
+    }
+
+    .profile-actions {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .profile-actions .secondary-btn {
+      background: #303434;
+      color: white;
+    }
+
+    .danger-text-btn,
+    .settings-danger button {
+      height: 40px;
+      padding: 0 14px;
+      color: #ff6570;
+      background: transparent;
+      font-weight: 700;
+    }
+
+    .profile-editor label {
+      display: block;
+      margin: 0 0 7px;
+      color: #b9bfbd;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .profile-editor textarea {
+      width: 100%;
+      resize: vertical;
+      border: 1px solid #3b403e;
+      border-radius: 8px;
+      outline: 0;
+      padding: 10px;
+      background: #222525;
+      color: white;
+      font: inherit;
+    }
+
+    .profile-editor .primary-btn {
+      margin-top: 10px;
+    }
+
+    .settings-list {
+      padding: 10px 0;
+    }
+
+    .settings-list button {
+      width: 100%;
+      min-height: 64px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-radius: 7px;
+      background: transparent;
+      color: #f5f7f6;
+      text-align: left;
+    }
+
+    .settings-list button:hover {
+      background: #232626;
+    }
+
+    .settings-icon {
+      width: 28px;
+      color: #adb4b1;
+      text-align: center;
+      font-size: 20px;
+    }
+
+    .settings-list b,
+    .settings-list small {
+      display: block;
+    }
+
+    .settings-list small {
+      margin-top: 4px;
+      color: #9da4a1;
+      font-size: 12px;
+    }
+
+    .settings-danger {
+      padding-top: 10px;
+      display: grid;
+      border-top: 1px solid #303333;
+    }
+
+    .settings-danger button {
+      text-align: left;
+    }
+
+    .call-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      overflow: hidden;
+      background: #111515;
+      color: white;
+    }
+
+    #remoteVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #localVideo {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: min(220px, 28vw);
+      aspect-ratio: 4 / 3;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      background: #262b2a;
+      object-fit: cover;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .call-info {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .call-info h2 {
+      margin: 18px 0 4px;
+    }
+
+    .call-info p {
+      margin: 0;
+      color: #c1c8c5;
+    }
+
+    .call-actions {
+      position: absolute;
+      left: 50%;
+      bottom: max(30px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: flex;
+      gap: 14px;
+    }
+
+    .call-action {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #353a39;
+      color: white;
+      font-size: 20px;
+    }
+
+    .call-action.accept {
+      background: var(--green);
+    }
+
+    .call-action.end {
+      background: #e43b47;
+      transform: rotate(135deg);
     }
 
     .toast {
@@ -649,12 +1161,139 @@
       background: var(--danger);
     }
 
+    .sync-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+      background: rgba(240, 242, 245, 0.94);
+      backdrop-filter: blur(7px);
+    }
+
+    .sync-card {
+      width: min(430px, 100%);
+      padding: 30px;
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .sync-spinner {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 18px;
+      border: 4px solid #dfe6e4;
+      border-top-color: var(--green-dark);
+      border-radius: 50%;
+      animation: sync-spin 0.85s linear infinite;
+    }
+
+    .sync-card.complete .sync-spinner {
+      border-color: var(--green);
+      animation: none;
+      position: relative;
+    }
+
+    .sync-card.complete .sync-spinner::after {
+      content: "\2713";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--green-dark);
+      font-size: 27px;
+      font-weight: 900;
+    }
+
+    .sync-card.failed .sync-spinner {
+      border-color: var(--danger);
+      animation: none;
+    }
+
+    .sync-card h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .sync-card p {
+      margin: 9px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .sync-progress {
+      height: 7px;
+      margin-top: 20px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e4e9e7;
+    }
+
+    .sync-progress-bar {
+      width: 34%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--green-dark);
+      transition: width 220ms ease;
+    }
+
+    .sync-progress.indeterminate .sync-progress-bar {
+      animation: sync-progress 1.2s ease-in-out infinite;
+    }
+
+    .sync-actions {
+      margin-top: 22px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      height: 40px;
+      padding: 0 16px;
+      border-radius: 8px;
+      background: #e3e7ea;
+      color: #3b4a54;
+      font-weight: 800;
+    }
+
+    @keyframes sync-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes sync-progress {
+      0% { transform: translateX(-130%); }
+      100% { transform: translateX(300%); }
+    }
+
     @media (max-width: 860px) {
       .app-shell {
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
         margin: 0;
         grid-template-columns: 1fr;
+      }
+
+      .topbar,
+      .chat-header {
+        height: auto;
+        min-height: 62px;
+      }
+
+      .topbar {
+        padding-top: max(10px, env(safe-area-inset-top));
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+      }
+
+      .chat-header {
+        padding-top: max(10px, env(safe-area-inset-top));
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
       }
 
       .sidebar {
@@ -681,14 +1320,54 @@
       }
 
       .bubble {
-        max-width: 88%;
+        max-width: min(420px, 88%);
+      }
+
+      .bubble-footer {
+        white-space: normal;
+      }
+
+      .composer {
+        padding-right: max(16px, env(safe-area-inset-right));
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+        padding-left: max(16px, env(safe-area-inset-left));
+      }
+
+      .attachment-draft {
+        position: absolute;
+        right: 70px;
+        bottom: 62px;
+        max-width: calc(100vw - 90px);
+      }
+
+      #localVideo {
+        top: max(12px, env(safe-area-inset-top));
+        right: 12px;
+        width: 32vw;
+      }
+
+      .sidebar-footer {
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sync-spinner,
+      .sync-progress.indeterminate .sync-progress-bar {
+        animation-duration: 2.4s;
       }
     }
   </style>
 </head>
 
 <body>
-  <main id="appShell" class="app-shell">
+  <main
+    id="appShell"
+    class="app-shell"
+    data-min-password-length="{{ min_password_length }}"
+    data-max-password-length="{{ max_password_length }}"
+    data-password-complexity-required="{{ password_require_complexity | lower }}"
+  >
     <section id="authSection" class="auth-screen">
       <div class="auth-card">
         <div class="brand-mark">313</div>
@@ -704,7 +1383,7 @@
 
           <div class="field">
             <label for="loginPassword">Password</label>
-            <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password">
+            <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" maxlength="{{ max_password_length }}">
           </div>
 
           <div class="password-tools">
@@ -715,7 +1394,7 @@
           </div>
 
           <button id="loginButton" class="primary-btn" type="button">Login</button>
-          <div id="loginStatus" class="status"></div>
+          <div id="loginStatus" class="status" role="status" aria-live="polite"></div>
 
           <div class="switch-text">
             New here?
@@ -735,12 +1414,12 @@
 
           <div class="field">
             <label for="regPassword">Password</label>
-            <input id="regPassword" type="password" placeholder="At least {{ min_password_length }} characters" autocomplete="new-password">
+            <input id="regPassword" type="password" placeholder="At least {{ min_password_length }} characters" autocomplete="new-password" maxlength="{{ max_password_length }}">
           </div>
 
           <div class="field">
             <label for="regConfirmPassword">Confirm Password</label>
-            <input id="regConfirmPassword" type="password" placeholder="Type the same password again" autocomplete="new-password">
+            <input id="regConfirmPassword" type="password" placeholder="Type the same password again" autocomplete="new-password" maxlength="{{ max_password_length }}">
           </div>
 
           <div class="password-tools">
@@ -751,7 +1430,7 @@
           </div>
 
           <button id="registerButton" class="primary-btn" type="button">Create Account</button>
-          <div id="regStatus" class="status"></div>
+          <div id="regStatus" class="status" role="status" aria-live="polite"></div>
 
           <div class="switch-text">
             Already registered?
@@ -766,30 +1445,29 @@
 
     <aside id="sidebar" class="sidebar hidden">
       <header class="topbar">
-        <div class="account">
+        <button id="accountButton" class="account" type="button" aria-label="Open account settings" title="Account settings">
           <div id="currentAvatar" class="avatar">ME</div>
           <div class="account-text">
             <h2 id="currentUserName">Secure User</h2>
-            <p>Online - encrypted storage demo</p>
+            <p id="currentUserStatus" role="status" aria-live="polite">Connecting securely...</p>
           </div>
-        </div>
+        </button>
 
         <div class="icon-row">
-          <button id="refreshButton" class="icon-btn" type="button" title="Refresh">R</button>
+          <button id="refreshButton" class="icon-btn" type="button" aria-label="Refresh and scan messages" title="Refresh and scan messages">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"/><path d="M18.2 15a7 7 0 1 1-.7-7.8L20 10"/></svg>
+          </button>
           <button id="logoutButton" class="pill-btn" type="button">Logout</button>
         </div>
       </header>
 
       <div class="search-area">
+        <label class="visually-hidden" for="searchUser">Search conversations or users</label>
         <div class="search-box">
-          <span>Search</span>
-          <input id="searchUser" type="text" placeholder="Search or start a new chat">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="searchUser" type="text" placeholder="Search conversations or users">
         </div>
       </div>
-
-      <section id="securitySummary" class="security-card">
-        <b>Security:</b> Loading security profile...
-      </section>
 
       <div id="chatList" class="chat-list">
         <div class="empty-list">Loading registered users...</div>
@@ -801,21 +1479,30 @@
     <section id="conversation" class="conversation hidden">
       <header class="chat-header">
         <div class="chat-person">
-          <button id="backButton" class="icon-btn back-btn" type="button" title="Back">&lt;</button>
+          <button id="backButton" class="icon-btn back-btn" type="button" aria-label="Back to conversations" title="Back to conversations">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
           <div id="selectedAvatar" class="avatar">?</div>
           <div class="chat-title">
             <h2 id="selectedUserName">Select a chat</h2>
-            <p id="selectedUserStatus">Choose a user to start secure messaging</p>
+            <p id="selectedUserStatus" role="status" aria-live="polite">Choose a user to start secure messaging</p>
           </div>
         </div>
 
         <div class="icon-row">
-          <button id="refreshMessagesButton" class="icon-btn" type="button" title="Refresh messages">R</button>
-          <button id="securityInfoButton" class="icon-btn" type="button" title="Security info">S</button>
+          <button id="audioCallButton" class="icon-btn" type="button" aria-label="Start audio call" title="Audio call" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
+          </button>
+          <button id="videoCallButton" class="icon-btn" type="button" aria-label="Start video call" title="Video call" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 13 5 3V8l-5 3Z"/><rect x="3" y="5" width="13" height="14" rx="2"/></svg>
+          </button>
+          <button id="refreshMessagesButton" class="icon-btn" type="button" aria-label="Refresh and scan messages" title="Refresh and scan messages">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"/><path d="M18.2 15a7 7 0 1 1-.7-7.8L20 10"/></svg>
+          </button>
         </div>
       </header>
 
-      <div id="messagesBox" class="messages">
+      <div id="messagesBox" class="messages" aria-label="Conversation messages">
         <div class="empty-chat">
           <div class="empty-chat-card">
             <h3>Badri 313</h3>
@@ -825,14 +1512,96 @@
       </div>
 
       <form id="messageForm" class="composer">
-        <button class="icon-btn" type="button" title="Attachment">+</button>
-        <input id="messageInput" type="text" placeholder="Select a chat first" maxlength="2000" disabled>
-        <button id="sendButton" class="send-btn" type="submit" title="Send" disabled>&gt;</button>
+        <input id="attachmentInput" class="visually-hidden" type="file" accept="image/*,audio/*,video/*,.pdf,.zip,.doc,.docx,.xls,.xlsx,.txt,.csv">
+        <button id="attachmentButton" class="icon-btn composer-tool" type="button" aria-label="Attach a file" title="Attach file" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21.4 11.6-9.2 9.2a6 6 0 0 1-8.5-8.5l9.9-9.9a4 4 0 0 1 5.7 5.7l-9.9 9.9a2 2 0 0 1-2.8-2.8l9.2-9.2"/></svg>
+        </button>
+        <div id="attachmentDraft" class="attachment-draft hidden">
+          <span id="attachmentDraftName"></span>
+          <button id="removeAttachmentButton" type="button" aria-label="Remove attachment" title="Remove attachment">&times;</button>
+        </div>
+        <label class="visually-hidden" for="messageInput">Message</label>
+        <textarea id="messageInput" rows="1" placeholder="Select a chat first" maxlength="2000" disabled></textarea>
+        <button id="sendButton" class="send-btn" type="submit" aria-label="Send message" title="Send message" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8-8-2Z"/><path d="m11 13 10-10"/></svg>
+        </button>
       </form>
     </section>
   </main>
 
-  <div id="toast" class="toast hidden"></div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <div id="settingsBackdrop" class="drawer-backdrop hidden"></div>
+  <aside id="settingsDrawer" class="settings-drawer hidden" aria-label="Account settings">
+    <header class="settings-header">
+      <button id="closeSettingsButton" class="icon-btn" type="button" aria-label="Close settings" title="Close settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h2>Settings</h2>
+    </header>
+    <div class="settings-scroll">
+      <div class="settings-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="settingsSearch" type="search" placeholder="Search settings">
+      </div>
+      <section class="profile-editor" data-setting-keywords="profile name picture bio account">
+        <div id="settingsAvatar" class="avatar profile-avatar">ME</div>
+        <h3 id="settingsUsername">Username</h3>
+        <p>Profile photo and public status</p>
+        <input id="profilePhotoInput" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+        <div class="profile-actions">
+          <button id="uploadPhotoButton" class="secondary-btn" type="button">Change photo</button>
+          <button id="removePhotoButton" class="danger-text-btn" type="button">Remove</button>
+        </div>
+        <label for="profileBio">About</label>
+        <textarea id="profileBio" maxlength="160" rows="3" placeholder="Write a short status"></textarea>
+        <button id="saveProfileButton" class="primary-btn" type="button">Save profile</button>
+      </section>
+      <nav class="settings-list" aria-label="Settings sections">
+        <button type="button" data-setting-keywords="general startup close"><span class="settings-icon">&#9635;</span><span><b>General</b><small>Startup and app preferences</small></span></button>
+        <button type="button" data-setting-keywords="privacy blocked disappearing messages"><span class="settings-icon">&#9638;</span><span><b>Privacy</b><small>Blocked contacts and message controls</small></span></button>
+        <button type="button" data-setting-keywords="chats theme wallpaper"><span class="settings-icon">&#9776;</span><span><b>Chats</b><small>Theme and conversation settings</small></span></button>
+        <button type="button" data-setting-keywords="video voice camera microphone speakers"><span class="settings-icon">&#9655;</span><span><b>Video &amp; voice</b><small>Camera, microphone and speakers</small></span></button>
+        <button type="button" data-setting-keywords="notifications messages sounds"><span class="settings-icon">&#9675;</span><span><b>Notifications</b><small>Messages, calls and sounds</small></span></button>
+      </nav>
+      <div class="settings-danger" data-setting-keywords="logout delete account">
+        <button id="settingsLogoutButton" type="button">Log out</button>
+        <button id="deleteAccountButton" type="button">Delete account</button>
+      </div>
+    </div>
+  </aside>
+
+  <section id="callOverlay" class="call-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="callTitle">
+    <video id="remoteVideo" autoplay playsinline></video>
+    <video id="localVideo" autoplay muted playsinline></video>
+    <div class="call-info">
+      <div id="callAvatar" class="avatar profile-avatar">?</div>
+      <h2 id="callTitle">Calling...</h2>
+      <p id="callStatus">Connecting securely</p>
+    </div>
+    <div class="call-actions">
+      <button id="acceptCallButton" class="call-action accept hidden" type="button" aria-label="Accept call" title="Accept call">&#9742;</button>
+      <button id="toggleMuteButton" class="call-action" type="button" aria-label="Mute microphone" title="Mute microphone">&#9835;</button>
+      <button id="toggleCameraButton" class="call-action" type="button" aria-label="Turn camera off" title="Toggle camera">&#9635;</button>
+      <button id="endCallButton" class="call-action end" type="button" aria-label="End call" title="End call">&#9742;</button>
+    </div>
+  </section>
+
+  <section id="syncOverlay" class="sync-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="syncTitle" aria-describedby="syncDetail syncSummary">
+    <div id="syncCard" class="sync-card">
+      <div class="sync-spinner" aria-hidden="true"></div>
+      <h2 id="syncTitle">Securing your session</h2>
+      <p id="syncDetail">Connecting to realtime messaging...</p>
+      <div id="syncProgress" class="sync-progress indeterminate" role="progressbar" aria-label="Secure message scan progress">
+        <div id="syncProgressBar" class="sync-progress-bar"></div>
+      </div>
+      <p id="syncSummary">Your chats will open after the integrity scan finishes.</p>
+      <div id="syncActions" class="sync-actions hidden">
+        <button id="retrySyncButton" class="primary-btn" type="button">Try again</button>
+        <button id="syncLogoutButton" class="secondary-btn" type="button">Logout</button>
+      </div>
+    </div>
+  </section>
 
 <script>
 let token = sessionStorage.getItem("token") || "";
@@ -840,20 +1609,38 @@ let currentUser = sessionStorage.getItem("username") || "";
 let socket = null;
 
 let allUsers = [];
+let userProfiles = new Map();
 let selectedUser = sessionStorage.getItem("selectedUser") || "";
-let inboxMessages = [];
-let sentMessages = [];
-let localSentPlaintexts = readSessionJSON("localSentPlaintexts", {});
-let pendingSentQueue = [];
-let latestSecurityStatus = null;
+let messageStore = new Map();
+let pendingMessages = new Map();
+let unreadCounts = new Map();
+let drafts = new Map();
+let onlineUsers = new Set();
+let latestScanStatus = null;
 let toastTimer = null;
+let socketJoined = false;
+let syncComplete = false;
+let appReady = false;
+let bootstrapping = false;
+let backgroundSyncing = false;
+let hasJoinedBefore = false;
+let selectedAttachmentFile = null;
+let attachmentObjectUrls = new Map();
+let attachmentSending = false;
+let peerConnection = null;
+let localCallStream = null;
+let activeCall = null;
+let pendingIceCandidates = [];
 let API_BASE = "";
 let backendReady = false;
 const BACKEND_CANDIDATES = getBackendCandidates();
 const BACKEND_HEALTH_TIMEOUT_MS = 1800;
 const API_REQUEST_TIMEOUT_MS = 30000;
-const MIN_PASSWORD_LENGTH = {{ min_password_length | tojson }};
-const PASSWORD_COMPLEXITY_REQUIRED = {{ password_require_complexity | tojson }};
+const APP_SHELL = document.getElementById("appShell");
+const MIN_PASSWORD_LENGTH = Number(APP_SHELL.dataset.minPasswordLength);
+const MAX_PASSWORD_LENGTH = Number(APP_SHELL.dataset.maxPasswordLength);
+const PASSWORD_COMPLEXITY_REQUIRED =
+  APP_SHELL.dataset.passwordComplexityRequired === "true";
 
 function readSessionJSON(key, fallback) {
   try {
@@ -986,21 +1773,193 @@ function avatarColor(name) {
 }
 
 function applyAvatar(element, name) {
+  if (!element) return;
+  const profile = userProfiles.get(name) || {};
   element.textContent = initials(name);
-  element.style.background = avatarColor(name);
+  element.style.backgroundColor = avatarColor(name);
+  element.style.backgroundImage = profile.photo ? `url("${profile.photo}")` : "none";
+  element.style.backgroundPosition = "center";
+  element.style.backgroundSize = "cover";
+  if (profile.photo) element.textContent = "";
+}
+
+function hydrateAvatarElements() {
+  document.querySelectorAll("[data-avatar-user]").forEach(element => {
+    applyAvatar(element, element.dataset.avatarUser || "");
+  });
+}
+
+function parseMessageDate(value) {
+  if (value instanceof Date) return value;
+  const text = String(value || "").trim();
+  if (!text) return null;
+
+  const normalized = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(text)
+    ? text.replace(" ", "T") + "Z"
+    : text;
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function startOfLocalDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function formatTime(value) {
-  const text = String(value || "");
-  const parts = text.split(" ");
-  if (parts.length === 2) return parts[1].slice(0, 5);
-  return text;
+  const date = parseMessageDate(value);
+  if (!date) return "";
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
 }
 
 function formatDay(value) {
-  const date = String(value || "").split(" ")[0];
+  const date = parseMessageDate(value);
   if (!date) return "Today";
-  return date;
+
+  const today = startOfLocalDay(new Date());
+  const messageDay = startOfLocalDay(date);
+  const dayDifference = Math.round((today - messageDay) / 86400000);
+  if (dayDifference === 0) return "Today";
+  if (dayDifference === 1) return "Yesterday";
+
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: dayDifference < 7 ? "long" : undefined,
+    year: dayDifference >= 7 ? "numeric" : undefined,
+    month: dayDifference >= 7 ? "short" : undefined,
+    day: dayDifference >= 7 ? "numeric" : undefined
+  }).format(date);
+}
+
+function localDayKey(value) {
+  const date = parseMessageDate(value);
+  if (!date) return "unknown";
+  return [date.getFullYear(), date.getMonth(), date.getDate()].join("-");
+}
+
+function formatListTime(value) {
+  const date = parseMessageDate(value);
+  if (!date) return "";
+  const label = formatDay(date);
+  if (label === "Today") return formatTime(date);
+  if (label === "Yesterday") return label;
+  return new Intl.DateTimeFormat(undefined, {month: "short", day: "numeric"}).format(date);
+}
+
+function messageSortValue(message) {
+  const date = parseMessageDate(message.time || message.created_at);
+  return date ? date.getTime() : Number(message.id || 0);
+}
+
+function createClientId() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+  return "client-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+}
+
+function wait(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+function setSyncOverlay({title, detail, summary, state = "loading", progress = null, actions = false}) {
+  const overlay = document.getElementById("syncOverlay");
+  const card = document.getElementById("syncCard");
+  const progressElement = document.getElementById("syncProgress");
+  const progressBar = document.getElementById("syncProgressBar");
+
+  overlay.classList.remove("hidden");
+  card.className = "sync-card" + (state === "complete" ? " complete" : state === "failed" ? " failed" : "");
+  document.getElementById("syncTitle").textContent = title;
+  document.getElementById("syncDetail").textContent = detail;
+  document.getElementById("syncSummary").textContent = summary;
+  document.getElementById("syncActions").classList.toggle("hidden", !actions);
+
+  if (progress === null) {
+    progressElement.classList.add("indeterminate");
+    progressElement.removeAttribute("aria-valuenow");
+    progressBar.style.width = "34%";
+  } else {
+    const safeProgress = Math.max(0, Math.min(100, Number(progress) || 0));
+    progressElement.classList.remove("indeterminate");
+    progressElement.setAttribute("aria-valuemin", "0");
+    progressElement.setAttribute("aria-valuemax", "100");
+    progressElement.setAttribute("aria-valuenow", String(safeProgress));
+    progressBar.style.width = safeProgress + "%";
+  }
+}
+
+function hideSyncOverlay() {
+  document.getElementById("syncOverlay").classList.add("hidden");
+}
+
+function updatePresenceUI() {
+  const accountStatus = document.getElementById("currentUserStatus");
+  const currentAvatar = document.getElementById("currentAvatar");
+  const selectedAvatar = document.getElementById("selectedAvatar");
+
+  currentAvatar.classList.toggle("online", socketJoined);
+  if (socketJoined) {
+    accountStatus.textContent = backgroundSyncing ? "Connected · scanning messages" : "Connected · encrypted messaging";
+  } else if (syncComplete) {
+    accountStatus.textContent = "Connected · offline delivery ready";
+  } else {
+    accountStatus.textContent = bootstrapping ? "Connecting securely..." : "Reconnecting securely...";
+  }
+
+  if (!selectedUser) {
+    selectedAvatar.classList.remove("online");
+    document.getElementById("selectedUserStatus").textContent = "Choose a user to start secure messaging";
+    return;
+  }
+
+  const presenceKnown = hasJoinedBefore;
+  const isOnline = onlineUsers.has(selectedUser);
+  selectedAvatar.classList.toggle("online", presenceKnown && isOnline);
+  document.getElementById("selectedUserStatus").textContent = presenceKnown
+    ? (isOnline ? "Online · secure conversation" : "Offline · secure conversation")
+    : "Presence unavailable · secure conversation";
+}
+
+function autoResizeComposer() {
+  const input = document.getElementById("messageInput");
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight, 132) + "px";
+}
+
+function updateReadyState() {
+  appReady = Boolean(syncComplete);
+  const input = document.getElementById("messageInput");
+  const sendButton = document.getElementById("sendButton");
+  const canCompose = Boolean(appReady && selectedUser && !attachmentSending);
+
+  input.disabled = !canCompose;
+  if (!selectedUser) {
+    input.placeholder = "Select a chat first";
+  } else if (!syncComplete) {
+    input.placeholder = "Scanning messages...";
+  } else if (!socketJoined) {
+    input.placeholder = "Message " + selectedUser;
+  } else {
+    input.placeholder = "Message " + selectedUser;
+  }
+
+  sendButton.disabled = !canCompose || !input.value.trim();
+  if (selectedAttachmentFile && canCompose) sendButton.disabled = false;
+  document.getElementById("attachmentButton").disabled = !canCompose;
+  const canCall = Boolean(selectedUser && syncComplete);
+  document.getElementById("audioCallButton").disabled = !canCall;
+  document.getElementById("videoCallButton").disabled = !canCall;
+  document.getElementById("refreshButton").disabled = bootstrapping || backgroundSyncing;
+  document.getElementById("refreshMessagesButton").disabled = bootstrapping || backgroundSyncing;
+  updatePresenceUI();
+}
+
+function conversationIsVisibleFor(user) {
+  if (selectedUser !== user || document.visibilityState !== "visible") return false;
+  return window.matchMedia("(min-width: 861px)").matches ||
+    document.getElementById("appShell").classList.contains("conversation-open");
 }
 
 function showToast(message, ok = true) {
@@ -1135,16 +2094,37 @@ function setupUIEventHandlers() {
   bindClick("showLoginButton", showLoginForm);
   bindClick("loginButton", loginUser);
   bindClick("registerButton", registerUser);
-  bindClick("refreshButton", refreshAll);
+  bindClick("refreshButton", manualSync);
   bindClick("logoutButton", logout);
+  bindClick("accountButton", openSettings);
+  bindClick("closeSettingsButton", closeSettings);
+  bindClick("settingsBackdrop", closeSettings);
+  bindClick("settingsLogoutButton", logout);
+  bindClick("uploadPhotoButton", () => document.getElementById("profilePhotoInput").click());
+  bindClick("removePhotoButton", removeProfilePhoto);
+  bindClick("saveProfileButton", saveProfile);
+  bindClick("deleteAccountButton", deleteAccount);
   bindClick("backButton", closeConversation);
-  bindClick("refreshMessagesButton", refreshMessages);
-  bindClick("securityInfoButton", showSecurityToast);
+  bindClick("audioCallButton", () => startCall("audio"));
+  bindClick("videoCallButton", () => startCall("video"));
+  bindClick("acceptCallButton", acceptIncomingCall);
+  bindClick("endCallButton", () => endCall(true));
+  bindClick("toggleMuteButton", toggleCallMute);
+  bindClick("toggleCameraButton", toggleCallCamera);
+  bindClick("attachmentButton", () => document.getElementById("attachmentInput").click());
+  bindClick("removeAttachmentButton", clearAttachmentDraft);
+  bindClick("refreshMessagesButton", manualSync);
+  bindClick("retrySyncButton", bootstrapApp);
+  bindClick("syncLogoutButton", logout);
 
   const searchUser = document.getElementById("searchUser");
   if (searchUser) {
     searchUser.addEventListener("input", renderUsersList);
   }
+
+  document.getElementById("settingsSearch").addEventListener("input", filterSettings);
+  document.getElementById("profilePhotoInput").addEventListener("change", uploadProfilePhoto);
+  document.getElementById("attachmentInput").addEventListener("change", selectAttachment);
 
   const chatList = document.getElementById("chatList");
   if (chatList) {
@@ -1159,6 +2139,42 @@ function setupUIEventHandlers() {
   if (messageForm) {
     messageForm.addEventListener("submit", sendMessage);
   }
+
+  const messageInput = document.getElementById("messageInput");
+  if (messageInput) {
+    messageInput.addEventListener("input", () => {
+      if (selectedUser) drafts.set(selectedUser, messageInput.value);
+      autoResizeComposer();
+      updateReadyState();
+    });
+    messageInput.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+        event.preventDefault();
+        if (!document.getElementById("sendButton").disabled) {
+          messageForm.requestSubmit();
+        }
+      }
+    });
+  }
+
+  const messagesBox = document.getElementById("messagesBox");
+  if (messagesBox) {
+    messagesBox.addEventListener("click", event => {
+      const retryButton = event.target.closest("[data-retry-client]");
+      if (retryButton) retryPendingMessage(retryButton.dataset.retryClient || "");
+      const unsendButton = event.target.closest("[data-unsend-id]");
+      if (unsendButton) unsendMessage(unsendButton.dataset.unsendId || "");
+      const downloadButton = event.target.closest("[data-download-url]");
+      if (downloadButton) downloadAttachment(downloadButton);
+    });
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (selectedUser && conversationIsVisibleFor(selectedUser)) {
+      unreadCounts.set(selectedUser, 0);
+      renderUsersList();
+    }
+  });
 
   ["loginUsername", "loginPassword"].forEach(id => {
     const input = document.getElementById(id);
@@ -1183,6 +2199,149 @@ function setupUIEventHandlers() {
   });
 }
 
+function openSettings() {
+  const profile = userProfiles.get(currentUser) || {username: currentUser, bio: "", photo: null};
+  document.getElementById("settingsUsername").textContent = currentUser;
+  document.getElementById("profileBio").value = profile.bio || "";
+  applyAvatar(document.getElementById("settingsAvatar"), currentUser);
+  document.getElementById("settingsDrawer").classList.remove("hidden");
+  document.getElementById("settingsBackdrop").classList.remove("hidden");
+}
+
+function closeSettings() {
+  document.getElementById("settingsDrawer").classList.add("hidden");
+  document.getElementById("settingsBackdrop").classList.add("hidden");
+}
+
+function filterSettings(event) {
+  const keyword = event.target.value.trim().toLowerCase();
+  document.querySelectorAll("[data-setting-keywords]").forEach(element => {
+    element.classList.toggle("hidden", Boolean(keyword) && !element.dataset.settingKeywords.includes(keyword));
+  });
+}
+
+function applyProfileUpdate(profile) {
+  if (!profile || !profile.username) return;
+  userProfiles.set(profile.username, profile);
+  hydrateAvatarElements();
+  applyAvatar(document.getElementById("currentAvatar"), currentUser);
+  applyAvatar(document.getElementById("selectedAvatar"), selectedUser);
+  if (profile.username === currentUser) {
+    applyAvatar(document.getElementById("settingsAvatar"), currentUser);
+    document.getElementById("profileBio").value = profile.bio || "";
+  }
+}
+
+async function saveProfile() {
+  const bio = document.getElementById("profileBio").value.trim();
+  const response = await authFetch("/api/profile", {
+    method: "PATCH",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({bio})
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) return showToast(data.error || "Profile could not be saved.", false);
+  applyProfileUpdate(data.profile);
+  showToast("Profile saved.");
+}
+
+async function uploadProfilePhoto(event) {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) return showToast("Profile image must be 2 MB or smaller.", false);
+  const form = new FormData();
+  form.append("photo", file);
+  const response = await authFetch("/api/profile/photo", {method: "POST", body: form});
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) return showToast(data.error || "Photo upload failed.", false);
+  applyProfileUpdate(data.profile);
+  showToast("Profile photo updated.");
+}
+
+async function removeProfilePhoto() {
+  const response = await authFetch("/api/profile/photo", {method: "DELETE"});
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) return showToast(data.error || "Photo could not be removed.", false);
+  applyProfileUpdate(data.profile);
+  showToast("Profile photo removed.");
+}
+
+async function deleteAccount() {
+  const password = window.prompt("Enter your password to permanently delete this account:");
+  if (!password) return;
+  if (!window.confirm("Delete your account and all related messages permanently?")) return;
+  const response = await authFetch("/api/account", {
+    method: "DELETE",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({password})
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) return showToast(data.error || "Account could not be deleted.", false);
+  await logout(false);
+}
+
+function selectAttachment(event) {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  if (file.size > 15 * 1024 * 1024) return showToast("File must be 15 MB or smaller.", false);
+  selectedAttachmentFile = file;
+  document.getElementById("attachmentDraftName").textContent = file.name;
+  document.getElementById("attachmentDraft").classList.remove("hidden");
+  updateReadyState();
+}
+
+function clearAttachmentDraft() {
+  selectedAttachmentFile = null;
+  document.getElementById("attachmentDraft").classList.add("hidden");
+  document.getElementById("attachmentDraftName").textContent = "";
+  updateReadyState();
+}
+
+async function sendAttachment(receiver, caption, file) {
+  const clientId = createClientId();
+  const form = new FormData();
+  form.append("receiver", receiver);
+  form.append("message", caption);
+  form.append("client_id", clientId);
+  form.append("file", file, file.name);
+  const response = await authFetch("/api/messages/attachments", {method: "POST", body: form});
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "File could not be sent.");
+  if (!data.message) throw new Error("The server did not return the shared file.");
+  return data.message;
+}
+
+async function downloadAttachment(button) {
+  button.disabled = true;
+  try {
+    const response = await authFetch(button.dataset.downloadUrl);
+    if (!response.ok) throw new Error("Attachment download failed.");
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = button.dataset.filename || "attachment";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    showToast(error.message, false);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function unsendMessage(messageUuid) {
+  if (!messageUuid || !window.confirm("Unsend this message for everyone?")) return;
+  const response = await authFetch("/api/messages/" + encodeURIComponent(messageUuid), {method: "DELETE"});
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) return showToast(data.error || "Message could not be unsent.", false);
+  upsertServerMessage(data.message);
+  renderMessages();
+  renderUsersList();
+}
+
 function validateUsername(username) {
   if (!/^[A-Za-z0-9_.-]{3,80}$/.test(username)) {
     return "Username can only use letters, numbers, dot, underscore, and hyphen.";
@@ -1193,6 +2352,9 @@ function validateUsername(username) {
 function validatePassword(password) {
   if (password.length < MIN_PASSWORD_LENGTH) {
     return "Password must be at least " + MIN_PASSWORD_LENGTH + " characters.";
+  }
+  if (password.length > MAX_PASSWORD_LENGTH) {
+    return "Password must not exceed " + MAX_PASSWORD_LENGTH + " characters.";
   }
   if (!PASSWORD_COMPLEXITY_REQUIRED) return "";
   if (!/[a-z]/.test(password)) return "Password needs one lowercase letter.";
@@ -1286,14 +2448,16 @@ async function loginUser() {
   currentUser = data.username;
   sessionStorage.setItem("token", token);
   sessionStorage.setItem("username", currentUser);
+  document.getElementById("loginPassword").value = "";
 
   status.className = "status ok";
-  status.textContent = "Login successful.";
-  showApp();
+  status.textContent = "Login successful. Starting secure scan...";
+  await showApp();
 }
 
-async function logout() {
-  if (token) {
+async function logout(callApi = true) {
+  if (activeCall) endCall(true);
+  if (token && callApi !== false) {
     try {
       await authFetch("/api/logout", {method: "POST"});
     } catch (error) {
@@ -1304,166 +2468,438 @@ async function logout() {
   sessionStorage.removeItem("token");
   sessionStorage.removeItem("username");
   sessionStorage.removeItem("selectedUser");
+  sessionStorage.removeItem("localSentPlaintexts");
+
+  token = "";
+  currentUser = "";
+  selectedUser = "";
+  messageStore.clear();
+  pendingMessages.clear();
+  unreadCounts.clear();
+  drafts.clear();
+  onlineUsers.clear();
+  userProfiles.clear();
+  attachmentObjectUrls.forEach(url => URL.revokeObjectURL(url));
+  attachmentObjectUrls.clear();
+  selectedAttachmentFile = null;
+  attachmentSending = false;
 
   if (socket) socket.disconnect();
   location.reload();
 }
 
-function showApp() {
+async function showApp() {
   document.getElementById("authSection").classList.add("hidden");
   document.getElementById("sidebar").classList.remove("hidden");
   document.getElementById("conversation").classList.remove("hidden");
   document.getElementById("currentUserName").textContent = currentUser;
   applyAvatar(document.getElementById("currentAvatar"), currentUser);
-
-  connectSocket();
-  refreshAll();
+  updateReadyState();
+  await bootstrapApp();
 }
 
 async function connectSocket() {
   if (socket) socket.disconnect();
+  socketJoined = false;
+  updateReadyState();
 
   if (typeof io !== "function") {
-    showToast("Socket.IO client did not load. Check your internet connection or serve the app from Flask.", false);
-    return;
+    throw new Error("Realtime messaging could not load. Check your connection and try again.");
   }
 
   if (!await ensureBackend()) {
-    showToast("Unable to open realtime chat. Please refresh the page.", false);
-    return;
+    throw new Error("The secure messaging server is not reachable.");
   }
 
   socket = io(API_BASE);
 
+  const initialJoin = new Promise((resolve, reject) => {
+    let settled = false;
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("Realtime authentication timed out. Please try again."));
+    }, 12000);
+
+    function settleJoined() {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      resolve();
+    }
+
+    function settleError(message) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      reject(new Error(message));
+    }
+
+    socket.on("joined", data => {
+      onlineUsers = new Set((data.online_users || []).filter(Boolean));
+      onlineUsers.add(currentUser);
+      socketJoined = true;
+      const rejoined = hasJoinedBefore;
+      hasJoinedBefore = true;
+      updateReadyState();
+      renderUsersList();
+      settleJoined();
+
+      if (rejoined && syncComplete && !bootstrapping) {
+        backgroundSync("Connection restored. Chats are up to date.");
+      }
+    });
+
+    socket.on("auth_error", data => {
+      socketJoined = false;
+      updateReadyState();
+      settleError(data.error || "Realtime authentication failed.");
+      showToast(data.error || "Authentication error.", false);
+      setTimeout(() => logout(false), 900);
+    });
+  });
+
   socket.on("connect", () => {
+    socketJoined = false;
+    updateReadyState();
     socket.emit("join", {token});
   });
 
   socket.on("receive_message", data => {
-    inboxMessages.push(data);
-    if (data.sender === selectedUser) renderMessages();
+    const wasKnown = hasServerMessage(data);
+    upsertServerMessage(data);
+    if (!wasKnown && !conversationIsVisibleFor(data.sender)) {
+      unreadCounts.set(data.sender, (unreadCounts.get(data.sender) || 0) + 1);
+    }
+    if (data.sender === selectedUser) renderMessages({stickToBottom: true});
     renderUsersList();
-    showToast("New secure message from " + data.sender);
+    if (!conversationIsVisibleFor(data.sender)) {
+      showToast("New secure message from " + data.sender);
+    }
   });
 
   socket.on("sent_message", data => {
-    const pending = pendingSentQueue.shift();
-    if (pending) {
-      localSentPlaintexts[data.message_uuid] = pending.message;
-      sessionStorage.setItem("localSentPlaintexts", JSON.stringify(localSentPlaintexts));
-    }
-
-    sentMessages.push(data);
-    if (data.receiver === selectedUser) renderMessages();
+    if (data.client_id) pendingMessages.delete(data.client_id);
+    upsertServerMessage(data);
+    if (data.receiver === selectedUser) renderMessages({stickToBottom: true});
     renderUsersList();
   });
 
-  socket.on("send_error", data => {
-    pendingSentQueue.shift();
-    showToast(data.error || "Message sending failed.", false);
+  socket.on("message_unsent", data => {
+    upsertServerMessage(data);
+    renderMessages();
+    renderUsersList();
   });
 
-  socket.on("auth_error", data => {
-    showToast(data.error || "Authentication error.", false);
-    setTimeout(logout, 900);
+  socket.on("profile_updated", applyProfileUpdate);
+
+  socket.on("account_deleted", data => {
+    const username = String(data.username || "");
+    if (!username || username === currentUser) return;
+    allUsers = allUsers.filter(user => user !== username);
+    userProfiles.delete(username);
+    if (selectedUser === username) {
+      selectedUser = "";
+      sessionStorage.removeItem("selectedUser");
+    }
+    renderUsersList();
+    renderMessages();
   });
+
+  socket.on("incoming_call", handleIncomingCall);
+  socket.on("call_answer", handleCallAnswer);
+  socket.on("ice_candidate", handleIceCandidate);
+  socket.on("call_ended", () => endCall(false));
+  socket.on("call_error", data => {
+    showToast(data.error || "Call could not connect.", false);
+    endCall(false);
+  });
+
+  socket.on("send_error", data => {
+    failPendingMessage(data.client_id || "", data.error || "Message sending failed.");
+  });
+
+  socket.on("presence_update", data => {
+    const username = String(data.username || "");
+    if (!username) return;
+    if (data.online === true) onlineUsers.add(username);
+    else onlineUsers.delete(username);
+    updatePresenceUI();
+    renderUsersList();
+  });
+
+  socket.on("disconnect", () => {
+    socketJoined = false;
+    updateReadyState();
+  });
+
+  socket.on("connect_error", () => {
+    socketJoined = false;
+    updateReadyState();
+  });
+
+  await initialJoin;
 }
 
-async function refreshAll() {
-  await Promise.all([loadUsers(), refreshMessages(), loadSecurityStatus()]);
-  if (selectedUser && allUsers.includes(selectedUser)) {
-    selectUser(selectedUser, false);
-  } else if (!selectedUser && allUsers.length > 0) {
-    selectUser(allUsers[0], false);
-  } else {
+function serverMessageKey(message) {
+  if (message && message.message_uuid) return "uuid:" + message.message_uuid;
+  return "legacy:" + [message.id, message.direction, message.sender, message.receiver].join(":");
+}
+
+function normalizeServerMessage(message) {
+  const outgoing = message.direction === "sent" || message.sender === currentUser;
+  const hashKnown = typeof message.hash_ok === "boolean";
+  const signatureKnown = typeof message.signature_ok === "boolean";
+  let verification = "unknown";
+  if (message.hash_ok === true && message.signature_ok === true) verification = "verified";
+  else if (message.hash_ok === false || message.signature_ok === false) verification = "failed";
+
+  return {
+    ...message,
+    key: serverMessageKey(message),
+    side: outgoing ? "out" : "in",
+    text: typeof message.decrypted_message === "string" ? message.decrypted_message : "",
+    time: message.created_at || "",
+    verification,
+    hashKnown,
+    signatureKnown,
+    deliveryState: outgoing
+      ? (message.delivery_status === "delivered" ? "delivered" : "stored")
+      : "received"
+  };
+}
+
+function hasServerMessage(message) {
+  return messageStore.has(serverMessageKey(message));
+}
+
+function upsertServerMessage(message) {
+  const normalized = normalizeServerMessage(message || {});
+  const existing = messageStore.get(normalized.key) || {};
+  const merged = {...existing, ...normalized};
+  if (existing.deliveryState === "delivered" && !(message && message.delivery_status)) {
+    merged.deliveryState = "delivered";
+  }
+  messageStore.set(normalized.key, merged);
+  if (message && message.client_id) pendingMessages.delete(message.client_id);
+}
+
+function reconcilePendingMessages() {
+  const storedOutgoing = [...messageStore.values()].filter(message => message.side === "out");
+  const matchedKeys = new Set();
+
+  for (const [clientId, pending] of pendingMessages.entries()) {
+    const pendingTime = messageSortValue(pending);
+    const match = storedOutgoing.find(message => {
+      if (matchedKeys.has(message.key)) return false;
+      const closeInTime = Math.abs(messageSortValue(message) - pendingTime) < 120000;
+      return message.receiver === pending.receiver && message.text === pending.text && closeInTime;
+    });
+    if (match) {
+      matchedKeys.add(match.key);
+      pendingMessages.delete(clientId);
+    }
+  }
+}
+
+function applySyncPayload(data) {
+  if (!data || !Array.isArray(data.users) || !Array.isArray(data.messages) || !data.scan) {
+    throw new Error("The server returned an incomplete scan result.");
+  }
+
+  data.messages.forEach(upsertServerMessage);
+  reconcilePendingMessages();
+
+  userProfiles = new Map(Object.entries(data.profiles || {}));
+  if (data.profile && data.profile.username) userProfiles.set(data.profile.username, data.profile);
+  applyAvatar(document.getElementById("currentAvatar"), currentUser);
+
+  const conversationUsers = [];
+  for (const message of messageStore.values()) {
+    const partner = message.side === "out" ? message.receiver : message.sender;
+    if (partner) conversationUsers.push(partner);
+  }
+  allUsers = [...new Set([...data.users, ...conversationUsers])]
+    .filter(user => user && user !== currentUser);
+
+  latestScanStatus = {
+    total: Number(data.scan.total) || 0,
+    verified: Number(data.scan.verified) || 0,
+    failed: Number(data.scan.failed) || 0,
+    scanned_at: data.scan.scanned_at || ""
+  };
+
+  if (selectedUser && !allUsers.includes(selectedUser)) {
+    drafts.delete(selectedUser);
+    selectedUser = "";
+    sessionStorage.removeItem("selectedUser");
+  }
+
+  if (selectedUser) selectUser(selectedUser, false);
+  else {
+    renderUsersList();
     renderMessages();
   }
 }
 
-async function loadUsers() {
-  const response = await authFetch("/api/users");
+async function fetchFullSync() {
+  const response = await authFetch("/api/sync", {cache: "no-store"});
+  const data = await response.json().catch(() => ({}));
+
   if (response.status === 401) {
-    logout();
-    return;
+    await logout(false);
+    throw new Error("Your session expired. Please login again.");
   }
   if (!response.ok) {
-    showToast("Could not load users.", false);
-    return;
+    throw new Error(data.error || "The secure message scan could not be completed.");
   }
-
-  const data = await response.json();
-  allUsers = (data.users || []).filter(user => user !== currentUser);
-  renderUsersList();
+  applySyncPayload(data);
+  return latestScanStatus;
 }
 
-async function loadSecurityStatus() {
-  const summary = document.getElementById("securitySummary");
+function scanSummaryText(scan) {
+  if (scan.failed > 0) {
+    return scan.failed + " message" + (scan.failed === 1 ? " was" : "s were") + " quarantined and hidden.";
+  }
+  return scan.total === 0
+    ? "No stored messages needed verification."
+    : scan.verified + " of " + scan.total + " messages passed integrity verification.";
+}
+
+async function runBlockingSync({reconnect, title}) {
+  if (bootstrapping) return;
+  bootstrapping = true;
+  syncComplete = false;
+  updateReadyState();
+  setSyncOverlay({
+    title,
+    detail: "Authenticating and preparing message delivery...",
+    summary: "Your chats will open after the integrity scan finishes."
+  });
 
   try {
-    const response = await authFetch("/api/security-status");
-    if (!response.ok) {
-      summary.innerHTML = "<b>Security:</b> Status unavailable.";
-      return;
+    let realtimeAvailable = socketJoined;
+    if (reconnect || !socketJoined) {
+      try {
+        await connectSocket();
+        realtimeAvailable = true;
+      } catch (socketError) {
+        socketJoined = false;
+        realtimeAvailable = false;
+        console.warn("Realtime unavailable; using stored delivery", socketError);
+      }
     }
+    setSyncOverlay({
+      title: "Scanning secure messages",
+      detail: realtimeAvailable
+        ? "Decrypting and checking hashes and signatures..."
+        : "Realtime is unavailable. Checking stored messages...",
+      summary: "This full scan must finish before messaging is enabled."
+    });
 
-    latestSecurityStatus = await response.json();
-    const debugDbUrl = escapeHTML(apiUrl("/debug-db"));
-    summary.innerHTML = `
-      <b>Security:</b><br>
-      ${escapeHTML(latestSecurityStatus.message_encryption)} storage<br>
-      ${escapeHTML(latestSecurityStatus.signature)} signatures<br>
-      <a href="${debugDbUrl}" target="_blank">Open database proof</a>
-    `;
+    const scan = await fetchFullSync();
+    syncComplete = true;
+    setSyncOverlay({
+      title: scan.failed > 0 ? "Scan complete with warnings" : "Secure scan complete",
+      detail: scan.total + " message" + (scan.total === 1 ? "" : "s") + " scanned · " + scan.verified + " verified",
+      summary: realtimeAvailable
+        ? scanSummaryText(scan)
+        : scanSummaryText(scan) + " Messages will use stored delivery until realtime reconnects.",
+      state: "complete",
+      progress: 100
+    });
+    await wait(scan.failed > 0 ? 1400 : 750);
+    hideSyncOverlay();
+    if (scan.failed > 0) showToast(scanSummaryText(scan), false);
   } catch (error) {
-    summary.innerHTML = "<b>Security:</b> Status unavailable.";
+    syncComplete = false;
+    setSyncOverlay({
+      title: "Secure scan could not finish",
+      detail: error.message || "The server could not complete the integrity scan.",
+      summary: "Messaging stays locked until authentication and the full integrity scan succeed.",
+      state: "failed",
+      progress: 0,
+      actions: true
+    });
+  } finally {
+    bootstrapping = false;
+    updateReadyState();
   }
 }
 
-function showSecurityToast() {
-  if (!latestSecurityStatus) {
-    showToast("Security status is still loading.", false);
-    return;
-  }
+async function bootstrapApp() {
+  return runBlockingSync({reconnect: true, title: "Securing your session"});
+}
 
-  showToast(
-    latestSecurityStatus.message_encryption +
-    " + " +
-    latestSecurityStatus.signature +
-    " + bcrypt passwords"
-  );
+async function manualSync() {
+  return runBlockingSync({reconnect: false, title: "Refreshing secure messages"});
+}
+
+async function refreshAll() {
+  return manualSync();
+}
+
+async function backgroundSync(successMessage = "Chats synchronized.") {
+  if (backgroundSyncing || bootstrapping) return;
+  backgroundSyncing = true;
+  syncComplete = false;
+  updateReadyState();
+  try {
+    await fetchFullSync();
+    syncComplete = true;
+    showToast(successMessage);
+  } catch (error) {
+    showToast(error.message || "Chats could not be synchronized.", false);
+  } finally {
+    backgroundSyncing = false;
+    updateReadyState();
+  }
 }
 
 function renderUsersList() {
   const list = document.getElementById("chatList");
   const keyword = document.getElementById("searchUser").value.trim().toLowerCase();
-  const filtered = allUsers.filter(user => user.toLowerCase().includes(keyword));
+  const filtered = allUsers
+    .filter(user => user.toLowerCase().includes(keyword))
+    .map(user => ({user, last: getLastMessageWithUser(user)}))
+    .sort((left, right) => {
+      const byRecent = right.last.sortValue - left.last.sortValue;
+      return byRecent || left.user.localeCompare(right.user);
+    });
 
   if (filtered.length === 0) {
     list.innerHTML = `
       <div class="empty-list">
-        No chats found.<br>
-        Open another browser or incognito window and create another user.
+        ${keyword ? "No matching conversations or users." : "No other users are available yet."}
       </div>
     `;
     return;
   }
 
-  list.innerHTML = filtered.map(user => {
-    const last = getLastMessageWithUser(user);
+  list.innerHTML = filtered.map(({user, last}) => {
     const active = user === selectedUser ? "active" : "";
+    const online = onlineUsers.has(user) ? " online" : "";
+    const unread = unreadCounts.get(user) || 0;
+    const unreadMarkup = unread
+      ? `<span class="unread-badge" aria-label="${unread} unread message${unread === 1 ? "" : "s"}">${unread > 99 ? "99+" : unread}</span>`
+      : "";
     return `
-      <button class="chat-item ${active}" type="button" data-user="${escapeHTML(user)}">
-        <div class="avatar small" style="background:${avatarColor(user)}">${escapeHTML(initials(user))}</div>
+      <button class="chat-item ${active}" type="button" data-user="${escapeHTML(user)}" ${active ? 'aria-current="true"' : ""}>
+        <div class="avatar small${online}" data-avatar-user="${escapeHTML(user)}">${escapeHTML(initials(user))}</div>
         <div class="chat-meta">
           <div class="chat-line">
             <strong>${escapeHTML(user)}</strong>
-            <span class="chat-time">${escapeHTML(last.time)}</span>
+            <span class="chat-time">${escapeHTML(formatListTime(last.time))}</span>
           </div>
-          <div class="chat-preview">${escapeHTML(last.preview || "Tap to start a secure chat")}</div>
+          <div class="chat-preview-line">
+            <div class="chat-preview">${escapeHTML(last.preview || (onlineUsers.has(user) ? "Online · start a secure chat" : "Start a secure chat"))}</div>
+            ${unreadMarkup}
+          </div>
         </div>
       </button>
     `;
   }).join("");
+  hydrateAvatarElements();
 }
 
 function selectUserFromElement(element) {
@@ -1472,20 +2908,21 @@ function selectUserFromElement(element) {
 
 function selectUser(user, openMobile = true) {
   if (!user) return;
+  const input = document.getElementById("messageInput");
+  if (selectedUser && selectedUser !== user) drafts.set(selectedUser, input.value);
   selectedUser = user;
   sessionStorage.setItem("selectedUser", user);
+  unreadCounts.set(user, 0);
 
   document.getElementById("selectedUserName").textContent = user;
-  document.getElementById("selectedUserStatus").textContent = "Online - verified secure room";
   applyAvatar(document.getElementById("selectedAvatar"), user);
-
-  document.getElementById("messageInput").disabled = false;
-  document.getElementById("sendButton").disabled = false;
-  document.getElementById("messageInput").placeholder = "Message " + user;
+  input.value = drafts.get(user) || "";
+  autoResizeComposer();
+  updateReadyState();
 
   if (openMobile) document.getElementById("appShell").classList.add("conversation-open");
   renderUsersList();
-  renderMessages();
+  renderMessages({stickToBottom: true});
 }
 
 function closeConversation() {
@@ -1493,51 +2930,62 @@ function closeConversation() {
 }
 
 async function refreshMessages() {
-  await Promise.all([loadInbox(), loadSent()]);
-  renderMessages();
-  renderUsersList();
-}
-
-async function loadInbox() {
-  const response = await authFetch("/api/inbox");
-  if (!response.ok) return;
-  const data = await response.json();
-  inboxMessages = data.messages || [];
-}
-
-async function loadSent() {
-  const response = await authFetch("/api/sent");
-  if (!response.ok) return;
-  const data = await response.json();
-  sentMessages = data.messages || [];
+  return manualSync();
 }
 
 function getMessagesWithSelectedUser() {
   if (!selectedUser) return [];
 
-  const received = inboxMessages
-    .filter(msg => msg.sender === selectedUser)
-    .map(msg => ({
-      ...msg,
-      side: "in",
-      text: msg.decrypted_message || "",
-      time: msg.created_at || ""
-    }));
-
-  const sent = sentMessages
-    .filter(msg => msg.receiver === selectedUser)
-    .map(msg => ({
-      ...msg,
-      side: "out",
-      text: msg.decrypted_message || localSentPlaintexts[msg.message_uuid] || "Encrypted message",
-      time: msg.created_at || ""
-    }));
-
-  return [...received, ...sent].sort((a, b) => String(a.time).localeCompare(String(b.time)));
+  const stored = [...messageStore.values()].filter(message =>
+    (message.side === "in" && message.sender === selectedUser) ||
+    (message.side === "out" && message.receiver === selectedUser)
+  );
+  const pending = [...pendingMessages.values()].filter(message => message.receiver === selectedUser);
+  return [...stored, ...pending].sort((left, right) =>
+    messageSortValue(left) - messageSortValue(right) || String(left.key || left.client_id).localeCompare(String(right.key || right.client_id))
+  );
 }
 
-function renderMessages() {
+function attachmentMarkup(attachment) {
+  if (!attachment) return "";
+  return `
+    <div class="message-attachment" data-attachment-preview data-url="${escapeHTML(attachment.url)}" data-mime="${escapeHTML(attachment.mime_type)}">
+      <button class="attachment-file" type="button" data-download-url="${escapeHTML(attachment.url)}" data-filename="${escapeHTML(attachment.filename)}">
+        <span aria-hidden="true">&#8681;</span>
+        <span>${escapeHTML(attachment.filename)}</span>
+      </button>
+    </div>
+  `;
+}
+
+async function hydrateMessageAttachments() {
+  document.querySelectorAll("[data-attachment-preview]").forEach(async container => {
+    const mime = container.dataset.mime || "";
+    if (!/^(image|audio|video)\//.test(mime)) return;
+    try {
+      const attachmentUrl = container.dataset.url;
+      let blobUrl = attachmentObjectUrls.get(attachmentUrl);
+      if (!blobUrl) {
+        const response = await authFetch(attachmentUrl);
+        if (!response.ok) return;
+        blobUrl = URL.createObjectURL(await response.blob());
+        attachmentObjectUrls.set(attachmentUrl, blobUrl);
+      }
+      if (!container.isConnected || container.querySelector("img, audio, video")) return;
+      const media = document.createElement(mime.startsWith("image/") ? "img" : mime.startsWith("audio/") ? "audio" : "video");
+      media.src = blobUrl;
+      media.alt = mime.startsWith("image/") ? "Shared image" : "";
+      if (!mime.startsWith("image/")) media.controls = true;
+      container.prepend(media);
+    } catch (error) {
+      console.warn("Attachment preview failed", error);
+    }
+  });
+}
+
+function renderMessages({stickToBottom = false} = {}) {
   const box = document.getElementById("messagesBox");
+  const wasNearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
 
   if (!selectedUser) {
     box.innerHTML = `
@@ -1555,7 +3003,7 @@ function renderMessages() {
   if (messages.length === 0) {
     box.innerHTML = `
       <div class="encryption-banner">
-        Messages are encrypted before database storage and verified with SHA-512 plus RSA signatures.
+        Verified messages are displayed after hash and signature checks. Anything unverified stays hidden.
       </div>
       <div class="empty-chat">
         <div class="empty-chat-card">
@@ -1570,45 +3018,73 @@ function renderMessages() {
   let lastDay = "";
   let html = `
     <div class="encryption-banner">
-      Messages are encrypted before database storage and verified before display.
+      Plaintext is shown only after hash and signature verification. Failed or unknown results are quarantined.
     </div>
   `;
 
   messages.forEach(msg => {
-    const day = formatDay(msg.time);
-    if (day !== lastDay) {
-      html += `<div class="date-chip">${escapeHTML(day)}</div>`;
-      lastDay = day;
+    const dayKey = localDayKey(msg.time);
+    if (dayKey !== lastDay) {
+      html += `<div class="date-chip">${escapeHTML(formatDay(msg.time))}</div>`;
+      lastDay = dayKey;
     }
 
     const outgoing = msg.side === "out";
-    const hashClass = msg.hash_ok === false ? " warn" : "";
-    const signatureClass = msg.signature_ok === false ? " warn" : "";
-    const ticks = outgoing ? "sent" : "verified";
+    const isPending = Boolean(msg.pendingState);
+    const sendFailed = msg.pendingState === "failed";
+    const isVerified = msg.verification === "verified";
+    const isVerificationFailed = msg.verification === "failed";
+    const bubbleClass = isPending ? (sendFailed ? " failed" : " pending") : "";
+    let bodyMarkup = "";
+    let statusMarkup = "";
+
+    if (msg.deleted) {
+      bodyMarkup = `<div class="unsent-text">This message was unsent</div>`;
+      statusMarkup = `<span>Unsent</span>`;
+    } else if (isPending) {
+      bodyMarkup = `<div class="bubble-text">${escapeHTML(msg.text)}</div>`;
+      statusMarkup = sendFailed
+        ? `<span class="verify-chip warn">Not sent</span><button class="retry-message-btn" type="button" data-retry-client="${escapeHTML(msg.client_id)}">Retry</button>`
+        : `<span class="verify-chip pending">Sending</span>`;
+    } else if (isVerified) {
+      bodyMarkup = `${msg.text ? `<div class="bubble-text">${escapeHTML(msg.text)}</div>` : ""}${attachmentMarkup(msg.attachment)}`;
+      statusMarkup = outgoing
+        ? `<span>${msg.deliveryState === "delivered" ? "Delivered" : "Stored"}</span><span class="verify-chip" title="SHA-512 hash and RSA signature passed">Verified</span>`
+        : `<span class="verify-chip" title="SHA-512 hash and RSA signature passed">Verified</span>`;
+    } else {
+      const reason = isVerificationFailed
+        ? "The integrity hash or digital signature did not match."
+        : "The server did not provide a complete verification result.";
+      bodyMarkup = `
+        <div class="quarantine" role="alert">
+          <strong>Message quarantined</strong>
+          <span>${escapeHTML(reason)} Its plaintext is hidden.</span>
+        </div>
+      `;
+      statusMarkup = `<span class="verify-chip warn">${isVerificationFailed ? "Verification failed" : "Verification unknown"}</span>`;
+    }
 
     html += `
       <div class="bubble-row ${outgoing ? "out" : "in"}">
-        <div class="bubble">
+        <article class="bubble${bubbleClass}" aria-label="${outgoing ? "Outgoing" : "Incoming"} message">
           ${outgoing ? "" : `<div class="bubble-name">${escapeHTML(msg.sender)}</div>`}
-          <div>${escapeHTML(msg.text)}</div>
-          <div class="verify-line">
-            <span class="verify-chip${hashClass}">Hash ${msg.hash_ok === false ? "Failed" : "OK"}</span>
-            <span class="verify-chip${signatureClass}">Sign ${msg.signature_ok === false ? "Failed" : "OK"}</span>
-          </div>
+          ${bodyMarkup}
           <div class="bubble-footer">
             <span>${escapeHTML(formatTime(msg.time))}</span>
-            <span>${ticks}</span>
+            <span class="bubble-status">${statusMarkup}</span>
+            ${outgoing && !isPending && !msg.deleted ? `<button class="unsend-btn" type="button" data-unsend-id="${escapeHTML(msg.message_uuid)}" aria-label="Unsend message" title="Unsend message">&#8942;</button>` : ""}
           </div>
-        </div>
+        </article>
       </div>
     `;
   });
 
   box.innerHTML = html;
-  box.scrollTop = box.scrollHeight;
+  hydrateMessageAttachments();
+  if (stickToBottom || wasNearBottom) box.scrollTop = box.scrollHeight;
 }
 
-function sendMessage(event) {
+async function sendMessage(event) {
   event.preventDefault();
 
   const input = document.getElementById("messageInput");
@@ -1619,7 +3095,7 @@ function sendMessage(event) {
     return;
   }
 
-  if (!message) {
+  if (!message && !selectedAttachmentFile) {
     showToast("Message cannot be empty.", false);
     return;
   }
@@ -1629,49 +3105,352 @@ function sendMessage(event) {
     return;
   }
 
-  if (!socket || !socket.connected) {
-    showToast("Socket is not connected. Please refresh or login again.", false);
+  if (!syncComplete) {
+    showToast("Messaging is locked until the secure scan is ready.", false);
     return;
   }
 
-  pendingSentQueue.push({receiver: selectedUser, message});
-  socket.emit("send_message", {
-    token,
-    receiver: selectedUser,
-    message
-  });
+  if (selectedAttachmentFile) {
+    const file = selectedAttachmentFile;
+    const receiver = selectedUser;
+    attachmentSending = true;
+    updateReadyState();
+    showToast("Encrypting and sending " + file.name + "...");
+    let sentMessage = null;
+    try {
+      sentMessage = await sendAttachment(receiver, message, file);
+    } catch (error) {
+      showToast(error.message || "File could not be sent.", false);
+    } finally {
+      attachmentSending = false;
+      updateReadyState();
+    }
 
+    if (sentMessage) {
+      clearAttachmentDraft();
+      drafts.delete(receiver);
+      input.value = "";
+      autoResizeComposer();
+      upsertServerMessage(sentMessage);
+      try {
+        renderMessages({stickToBottom: true});
+        renderUsersList();
+      } catch (renderError) {
+        console.error("Shared file could not be rendered", renderError);
+      }
+      showToast("File shared securely.");
+    }
+    updateReadyState();
+    input.focus();
+    return;
+  }
+
+  for (const [clientId, pending] of pendingMessages.entries()) {
+    if (pending.pendingState === "failed" && pending.receiver === selectedUser && pending.text === message) {
+      pendingMessages.delete(clientId);
+    }
+  }
+
+  queueOutgoingMessage(selectedUser, message);
+  drafts.delete(selectedUser);
   input.value = "";
+  autoResizeComposer();
+  updateReadyState();
+}
+
+function queueOutgoingMessage(receiver, message) {
+  const clientId = createClientId();
+  pendingMessages.set(clientId, {
+    key: "pending:" + clientId,
+    client_id: clientId,
+    receiver,
+    sender: currentUser,
+    side: "out",
+    text: message,
+    time: new Date().toISOString(),
+    pendingState: "sending"
+  });
+  renderMessages({stickToBottom: true});
+  renderUsersList();
+  sendQueuedMessage(clientId);
+  return clientId;
+}
+
+async function sendQueuedMessage(clientId) {
+  const pending = pendingMessages.get(clientId);
+  if (!pending) return;
+
+  const payload = {
+    token,
+    receiver: pending.receiver,
+    message: pending.text,
+    client_id: clientId
+  };
+
+  if (socket && socket.connected && socketJoined) {
+    socket.emit("send_message", payload);
+    return;
+  }
+
+  try {
+    const response = await authFetch("/api/messages", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        receiver: pending.receiver,
+        message: pending.text,
+        client_id: clientId
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401) {
+      await logout(false);
+      return;
+    }
+    if (!response.ok) {
+      failPendingMessage(clientId, data.error || "Message sending failed.");
+      return;
+    }
+
+    if (data.message) {
+      pendingMessages.delete(clientId);
+      upsertServerMessage(data.message);
+      if (data.message.receiver === selectedUser) renderMessages({stickToBottom: true});
+      renderUsersList();
+    }
+  } catch (error) {
+    failPendingMessage(clientId, error.message || "Message sending failed.");
+  }
+}
+
+function failPendingMessage(clientId, errorMessage) {
+  let pending = clientId ? pendingMessages.get(clientId) : null;
+  if (!pending) {
+    pending = [...pendingMessages.values()].find(message => message.pendingState === "sending");
+  }
+  if (!pending) {
+    showToast(errorMessage, false);
+    return;
+  }
+
+  pending.pendingState = "failed";
+  pending.error = errorMessage;
+  pendingMessages.set(pending.client_id, pending);
+
+  const existingDraft = drafts.get(pending.receiver) || "";
+  const restoredDraft = existingDraft.trim()
+    ? pending.text + "\n" + existingDraft
+    : pending.text;
+  drafts.set(pending.receiver, restoredDraft);
+  if (selectedUser === pending.receiver) {
+    const input = document.getElementById("messageInput");
+    input.value = restoredDraft;
+    autoResizeComposer();
+  }
+  updateReadyState();
+  renderMessages({stickToBottom: true});
+  renderUsersList();
+  showToast(errorMessage + " Your draft was restored.", false);
+}
+
+function retryPendingMessage(clientId) {
+  const pending = pendingMessages.get(clientId);
+  if (!pending) return;
+  if (!syncComplete) {
+    showToast("Finish the secure scan before retrying.", false);
+    return;
+  }
+
+  pendingMessages.delete(clientId);
+  if (drafts.get(pending.receiver) === pending.text) drafts.delete(pending.receiver);
+  if (selectedUser === pending.receiver) {
+    const input = document.getElementById("messageInput");
+    input.value = drafts.get(pending.receiver) || "";
+    autoResizeComposer();
+  }
+  queueOutgoingMessage(pending.receiver, pending.text);
+  updateReadyState();
+}
+
+function showCallOverlay(person, status, incoming = false, mode = "audio") {
+  document.getElementById("callOverlay").classList.remove("hidden");
+  document.getElementById("callTitle").textContent = person;
+  document.getElementById("callStatus").textContent = status;
+  document.getElementById("acceptCallButton").classList.toggle("hidden", !incoming);
+  document.getElementById("toggleMuteButton").classList.toggle("hidden", incoming);
+  document.getElementById("toggleCameraButton").classList.toggle("hidden", incoming || mode !== "video");
+  applyAvatar(document.getElementById("callAvatar"), person);
+}
+
+async function openLocalCallMedia(mode) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error("Camera and microphone are not available in this browser.");
+  }
+  localCallStream = await navigator.mediaDevices.getUserMedia({audio: true, video: mode === "video"});
+  document.getElementById("localVideo").srcObject = localCallStream;
+  document.getElementById("localVideo").classList.toggle("hidden", mode !== "video");
+}
+
+function createPeerConnection() {
+  peerConnection = new RTCPeerConnection({iceServers: [{urls: "stun:stun.l.google.com:19302"}]});
+  if (localCallStream) localCallStream.getTracks().forEach(track => peerConnection.addTrack(track, localCallStream));
+  peerConnection.onicecandidate = event => {
+    if (!event.candidate || !activeCall || !socketJoined) return;
+    socket.emit("ice_candidate", {target: activeCall.target, call_id: activeCall.id, candidate: event.candidate});
+  };
+  peerConnection.ontrack = event => {
+    document.getElementById("remoteVideo").srcObject = event.streams[0];
+    document.getElementById("callStatus").textContent = "Connected";
+  };
+  peerConnection.onconnectionstatechange = () => {
+    if (peerConnection && ["failed", "disconnected", "closed"].includes(peerConnection.connectionState)) endCall(false);
+  };
+}
+
+async function flushPendingIce() {
+  if (!peerConnection || !peerConnection.remoteDescription) return;
+  const candidates = pendingIceCandidates.splice(0);
+  for (const candidate of candidates) {
+    try { await peerConnection.addIceCandidate(candidate); }
+    catch (error) { console.warn("ICE candidate rejected", error); }
+  }
+}
+
+async function startCall(mode) {
+  if (!selectedUser || !syncComplete) return showToast("Select a chat after the secure scan finishes.", false);
+  if (!socketJoined || !onlineUsers.has(selectedUser)) {
+    queueOutgoingMessage(selectedUser, mode === "video" ? "Missed video call" : "Missed audio call");
+    showToast(selectedUser + " is offline. A call notification was sent.");
+    return;
+  }
+  if (activeCall) return showToast("Another call is already active.", false);
+  activeCall = {id: createClientId(), target: selectedUser, mode, incoming: false};
+  showCallOverlay(selectedUser, mode === "video" ? "Starting video call..." : "Calling...", false, mode);
+  try {
+    await openLocalCallMedia(mode);
+    createPeerConnection();
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit("call_offer", {target: selectedUser, call_id: activeCall.id, mode, description: peerConnection.localDescription});
+  } catch (error) {
+    showToast(error.message || "Call permission was denied.", false);
+    endCall(false);
+  }
+}
+
+function handleIncomingCall(data) {
+  if (!data || !data.from || !data.description) return;
+  if (activeCall) {
+    socket.emit("call_answer", {target: data.from, call_id: data.call_id, accepted: false, mode: data.mode || "audio"});
+    return;
+  }
+  activeCall = {id: data.call_id, target: data.from, mode: data.mode === "video" ? "video" : "audio", incoming: true, description: data.description};
+  showCallOverlay(data.from, activeCall.mode === "video" ? "Incoming video call" : "Incoming audio call", true, activeCall.mode);
+}
+
+async function acceptIncomingCall() {
+  if (!activeCall || !activeCall.incoming) return;
+  try {
+    document.getElementById("acceptCallButton").classList.add("hidden");
+    document.getElementById("callStatus").textContent = "Connecting...";
+    await openLocalCallMedia(activeCall.mode);
+    createPeerConnection();
+    await peerConnection.setRemoteDescription(activeCall.description);
+    await flushPendingIce();
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    socket.emit("call_answer", {target: activeCall.target, call_id: activeCall.id, accepted: true, mode: activeCall.mode, description: peerConnection.localDescription});
+    activeCall.incoming = false;
+    document.getElementById("toggleMuteButton").classList.remove("hidden");
+    document.getElementById("toggleCameraButton").classList.toggle("hidden", activeCall.mode !== "video");
+  } catch (error) {
+    showToast(error.message || "Call could not be accepted.", false);
+    endCall(true);
+  }
+}
+
+async function handleCallAnswer(data) {
+  if (!activeCall || data.call_id !== activeCall.id) return;
+  if (data.accepted === false) {
+    showToast("Call was declined.", false);
+    endCall(false);
+    return;
+  }
+  if (!peerConnection || !data.description) return;
+  await peerConnection.setRemoteDescription(data.description);
+  await flushPendingIce();
+  document.getElementById("callStatus").textContent = "Connected";
+}
+
+async function handleIceCandidate(data) {
+  if (!activeCall || data.call_id !== activeCall.id || !data.candidate) return;
+  if (!peerConnection || !peerConnection.remoteDescription) {
+    pendingIceCandidates.push(data.candidate);
+    return;
+  }
+  try { await peerConnection.addIceCandidate(data.candidate); }
+  catch (error) { console.warn("ICE candidate rejected", error); }
+}
+
+function toggleCallMute() {
+  const track = localCallStream && localCallStream.getAudioTracks()[0];
+  if (!track) return;
+  track.enabled = !track.enabled;
+  document.getElementById("toggleMuteButton").classList.toggle("active", !track.enabled);
+  document.getElementById("toggleMuteButton").title = track.enabled ? "Mute microphone" : "Unmute microphone";
+}
+
+function toggleCallCamera() {
+  const track = localCallStream && localCallStream.getVideoTracks()[0];
+  if (!track) return;
+  track.enabled = !track.enabled;
+  document.getElementById("toggleCameraButton").classList.toggle("active", !track.enabled);
+  document.getElementById("toggleCameraButton").title = track.enabled ? "Turn camera off" : "Turn camera on";
+}
+
+function endCall(notifyPeer = true) {
+  if (notifyPeer && activeCall && socket && socketJoined) socket.emit("call_end", {target: activeCall.target, call_id: activeCall.id});
+  if (peerConnection) peerConnection.close();
+  if (localCallStream) localCallStream.getTracks().forEach(track => track.stop());
+  peerConnection = null;
+  localCallStream = null;
+  activeCall = null;
+  pendingIceCandidates = [];
+  document.getElementById("remoteVideo").srcObject = null;
+  document.getElementById("localVideo").srcObject = null;
+  document.getElementById("callOverlay").classList.add("hidden");
 }
 
 function getLastMessageWithUser(user) {
-  const received = inboxMessages
-    .filter(msg => msg.sender === user)
-    .map(msg => ({
-      text: msg.decrypted_message || "Received encrypted message",
-      time: msg.created_at || ""
-    }));
-
-  const sent = sentMessages
-    .filter(msg => msg.receiver === user)
-    .map(msg => ({
-      text: msg.decrypted_message || localSentPlaintexts[msg.message_uuid] || "Encrypted message sent",
-      time: msg.created_at || ""
-    }));
-
-  const all = [...received, ...sent].sort((a, b) => String(a.time).localeCompare(String(b.time)));
-  if (all.length === 0) return {preview: "", time: ""};
+  const stored = [...messageStore.values()].filter(message =>
+    (message.side === "in" && message.sender === user) ||
+    (message.side === "out" && message.receiver === user)
+  );
+  const pending = [...pendingMessages.values()].filter(message => message.receiver === user);
+  const all = [...stored, ...pending].sort((left, right) => messageSortValue(left) - messageSortValue(right));
+  if (all.length === 0) return {preview: "", time: "", sortValue: 0};
 
   const last = all[all.length - 1];
+  let preview = last.verification && last.verification !== "verified"
+    ? "Quarantined message"
+    : last.text;
+  if (last.deleted) preview = "Message unsent";
+  else if (last.attachment && !preview) preview = "Shared " + last.attachment.filename;
+  if (last.pendingState === "sending") preview = "Sending: " + last.text;
+  if (last.pendingState === "failed") preview = "Not sent: " + last.text;
+  else if (last.side === "out" && !last.pendingState && last.verification === "verified" && !last.deleted) preview = "You: " + (preview || "Attachment");
   return {
-    preview: last.text,
-    time: formatTime(last.time)
+    preview,
+    time: last.time,
+    sortValue: messageSortValue(last)
   };
 }
 
 setupUIEventHandlers();
 setupPasswordToggles();
 ensureBackend();
+document.documentElement.dataset.appInitialized = "true";
 
 if (token && currentUser) {
   showApp();

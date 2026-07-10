@@ -80,31 +80,30 @@
     <h1>Badri 313 Database Security View</h1>
 
     <p>
-        This page is for project demonstration. It proves that user passwords are stored as bcrypt hashes,
-        messages are stored as encrypted ciphertext, and RSA private keys are not stored in the database.
+        This optional local proof view only shows the signed-in account and its conversations.
+        Secret hash values, plaintext, ciphertext, nonces, tags, and signatures are redacted.
     </p>
 
     <p>
         <a href="/">Back to Main App</a>
     </p>
 
-    <button onclick="loadDatabaseView()">Refresh Database View</button>
+    <button id="refreshDatabaseButton" type="button">Refresh Database View</button>
 </div>
 
 <div class="card">
     <h2>Users Table</h2>
 
     <p class="safe">
-        Plaintext password is not stored. bcrypt password hash is stored.
+        Passwords use salted PBKDF2-HMAC-SHA512. The reusable hash value is never returned by this API.
     </p>
 
     <p class="safe">
-        RSA private key is not stored in the database. Only RSA public key is stored.
+        RSA private keys are AES-256-GCM wrapped with a separate key-encryption key.
     </p>
 
     <p class="warn">
-        username_display is kept for login and receiver selection.
-        username_hash is stored to demonstrate identity hashing.
+        This view is disabled by default. Enable it only for a controlled local demonstration.
     </p>
 
     <div id="usersTable" class="table-wrap"></div>
@@ -114,8 +113,7 @@
     <h2>Messages Table</h2>
 
     <p class="safe">
-        Plaintext messages are not stored. Only encrypted ciphertext, nonce, AES tag,
-        SHA-512 hash, RSA signature, and UUID are stored.
+        Plaintext messages are not stored. This view proves the protected fields exist without exposing their values.
     </p>
 
     <div id="messagesTable" class="table-wrap"></div>
@@ -163,11 +161,10 @@ function renderUsers(users) {
             <tr>
                 <th>ID</th>
                 <th>Username Display</th>
-                <th>Username Hash</th>
-                <th>bcrypt Password Hash</th>
+                <th>Password Algorithm</th>
+                <th>Password Value</th>
                 <th>Failed Attempts</th>
-                <th>Locked Until</th>
-                <th>RSA Public Key Start</th>
+                <th>RSA Public Key Fingerprint</th>
                 <th>Private Key Storage Status</th>
             </tr>
 
@@ -175,11 +172,10 @@ function renderUsers(users) {
                 <tr>
                     <td>${user.id}</td>
                     <td>${escapeHTML(user.username_display)}</td>
-                    <td><code>${escapeHTML(user.username_hash)}</code></td>
-                    <td><code>${escapeHTML(user.password_hash)}</code></td>
+                    <td>${escapeHTML(user.password_hash_algorithm)}</td>
+                    <td><code>${escapeHTML(user.password_hash_value)}</code></td>
                     <td>${escapeHTML(user.failed_attempts)}</td>
-                    <td>${escapeHTML(user.locked_until || "None")}</td>
-                    <td><code>${escapeHTML(user.rsa_public_key_start)}</code></td>
+                    <td><code>${escapeHTML(user.rsa_public_key_fingerprint)}</code></td>
                     <td class="safe">${escapeHTML(user.private_key_storage_status)}</td>
                 </tr>
             `).join("")}
@@ -200,13 +196,11 @@ function renderMessages(messages) {
                 <th>Message UUID</th>
                 <th>Sender</th>
                 <th>Receiver</th>
-                <th>Sender Hash</th>
-                <th>Receiver Hash</th>
-                <th>Encrypted Message</th>
-                <th>Nonce</th>
-                <th>AES Tag</th>
+                <th>Ciphertext Bytes</th>
+                <th>AES-GCM Tag</th>
                 <th>SHA-512 Hash</th>
-                <th>Digital Signature Start</th>
+                <th>RSA Signature</th>
+                <th>Security Version</th>
                 <th>Created At</th>
             </tr>
 
@@ -216,13 +210,11 @@ function renderMessages(messages) {
                     <td><code>${escapeHTML(msg.message_uuid)}</code></td>
                     <td>${escapeHTML(msg.sender_display)}</td>
                     <td>${escapeHTML(msg.receiver_display)}</td>
-                    <td><code>${escapeHTML(msg.sender_hash)}</code></td>
-                    <td><code>${escapeHTML(msg.receiver_hash)}</code></td>
-                    <td><code>${escapeHTML(msg.encrypted_message)}</code></td>
-                    <td><code>${escapeHTML(msg.nonce)}</code></td>
-                    <td><code>${escapeHTML(msg.aes_tag)}</code></td>
-                    <td><code>${escapeHTML(msg.plaintext_sha512_hash)}</code></td>
-                    <td><code>${escapeHTML(msg.digital_signature_start)}</code></td>
+                    <td>${escapeHTML(msg.ciphertext_bytes)}</td>
+                    <td class="safe">${msg.aes_gcm_tag_present ? "Present" : "Missing"}</td>
+                    <td><code>${escapeHTML(msg.sha512_hash_value)}</code></td>
+                    <td class="safe">${msg.digital_signature_present ? "Present" : "Missing"}</td>
+                    <td>${escapeHTML(msg.security_version)}</td>
                     <td>${escapeHTML(msg.created_at)}</td>
                 </tr>
             `).join("")}
@@ -240,6 +232,7 @@ function escapeHTML(value) {
     }[c]));
 }
 
+document.getElementById("refreshDatabaseButton").addEventListener("click", loadDatabaseView);
 loadDatabaseView();
 </script>
 
