@@ -188,6 +188,11 @@
       background: #05735f;
     }
 
+    .primary-btn:disabled {
+      opacity: 0.72;
+      cursor: not-allowed;
+    }
+
     .status {
       min-height: 19px;
       margin: 12px 0 0;
@@ -721,7 +726,7 @@
 
         <div id="registerForm" class="hidden">
           <h1>Create Account</h1>
-          <p>Create your Badri 313 account with a strong password.</p>
+          <p>Create your Badri 313 account with a password of {{ min_password_length }} or more characters.</p>
 
           <div class="field">
             <label for="regUsername">Username</label>
@@ -730,7 +735,7 @@
 
           <div class="field">
             <label for="regPassword">Password</label>
-            <input id="regPassword" type="password" placeholder="Example: Secret1!" autocomplete="new-password">
+            <input id="regPassword" type="password" placeholder="At least {{ min_password_length }} characters" autocomplete="new-password">
           </div>
 
           <div class="field">
@@ -838,13 +843,26 @@ let allUsers = [];
 let selectedUser = sessionStorage.getItem("selectedUser") || "";
 let inboxMessages = [];
 let sentMessages = [];
-let localSentPlaintexts = JSON.parse(sessionStorage.getItem("localSentPlaintexts") || "{}");
+let localSentPlaintexts = readSessionJSON("localSentPlaintexts", {});
 let pendingSentQueue = [];
 let latestSecurityStatus = null;
 let toastTimer = null;
 let API_BASE = "";
 let backendReady = false;
 const BACKEND_CANDIDATES = getBackendCandidates();
+const BACKEND_HEALTH_TIMEOUT_MS = 1800;
+const API_REQUEST_TIMEOUT_MS = 30000;
+const MIN_PASSWORD_LENGTH = {{ min_password_length | tojson }};
+const PASSWORD_COMPLEXITY_REQUIRED = {{ password_require_complexity | tojson }};
+
+function readSessionJSON(key, fallback) {
+  try {
+    return JSON.parse(sessionStorage.getItem(key) || JSON.stringify(fallback));
+  } catch (error) {
+    sessionStorage.removeItem(key);
+    return fallback;
+  }
+}
 
 function getBackendCandidates() {
   const bases = [];
@@ -870,6 +888,29 @@ function apiUrl(path) {
   return API_BASE + path;
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = API_REQUEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function backendUnavailableMessage() {
+  return "Backend server is not reachable. Start Flask with: python app.py, then open http://127.0.0.1:5000";
+}
+
+function backendNetworkErrorMessage() {
+  const target = API_BASE || defaultBackendBase();
+  return "Could not connect to " + target + ". Make sure Flask is running with: python app.py";
+}
+
 function defaultBackendBase() {
   if (window.location.protocol === "http:" || window.location.protocol === "https:") {
     const isFlaskPort = window.location.port === "5000" || window.location.port === "5001";
@@ -892,7 +933,11 @@ async function ensureBackend() {
 
   for (const base of BACKEND_CANDIDATES) {
     try {
-      const response = await fetch(base + "/api/health", {cache: "no-store"});
+      const response = await fetchWithTimeout(
+        base + "/api/health",
+        {cache: "no-store"},
+        BACKEND_HEALTH_TIMEOUT_MS
+      );
 
       if (!response.ok) continue;
 
@@ -971,16 +1016,20 @@ function showToast(message, ok = true) {
 }
 
 async function postJSON(url, body) {
-  await ensureBackend();
+  const hasBackend = await ensureBackend();
 
-  if (!API_BASE) {
-    API_BASE = defaultBackendBase();
+  if (!hasBackend) {
+    return {
+      ok: false,
+      status: 0,
+      data: {error: backendUnavailableMessage()}
+    };
   }
 
   let response;
 
   try {
-    response = await fetch(apiUrl(url), {
+    response = await fetchWithTimeout(apiUrl(url), {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(body)
@@ -989,7 +1038,7 @@ async function postJSON(url, body) {
     return {
       ok: false,
       status: 0,
-      data: {error: "Could not create account right now. Please refresh and try again."}
+      data: {error: backendNetworkErrorMessage()}
     };
   }
 
@@ -1007,28 +1056,43 @@ async function postJSON(url, body) {
 }
 
 async function authFetch(url, options = {}) {
-  await ensureBackend();
+  const hasBackend = await ensureBackend();
 
-  if (!API_BASE) {
-    API_BASE = defaultBackendBase();
+  if (!hasBackend) {
+    return new Response(
+      JSON.stringify({error: backendUnavailableMessage()}),
+      {status: 503, headers: {"Content-Type": "application/json"}}
+    );
   }
 
   const headers = options.headers || {};
   headers.Authorization = "Bearer " + token;
-  return fetch(apiUrl(url), {
-    ...options,
-    headers
-  });
+
+  try {
+    return await fetchWithTimeout(apiUrl(url), {
+      ...options,
+      headers
+    });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({error: backendNetworkErrorMessage()}),
+      {status: 503, headers: {"Content-Type": "application/json"}}
+    );
+  }
 }
 
 function showRegisterForm() {
   document.getElementById("loginForm").classList.add("hidden");
   document.getElementById("registerForm").classList.remove("hidden");
+  document.getElementById("loginStatus").textContent = "";
+  document.getElementById("regStatus").textContent = "";
 }
 
 function showLoginForm() {
   document.getElementById("registerForm").classList.add("hidden");
   document.getElementById("loginForm").classList.remove("hidden");
+  document.getElementById("loginStatus").textContent = "";
+  document.getElementById("regStatus").textContent = "";
 }
 
 function toggleLoginPassword() {
@@ -1127,9 +1191,10 @@ function validateUsername(username) {
 }
 
 function validatePassword(password) {
-  if (password.length < 8) {
-    return "Password must be at least 8 characters.";
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    return "Password must be at least " + MIN_PASSWORD_LENGTH + " characters.";
   }
+  if (!PASSWORD_COMPLEXITY_REQUIRED) return "";
   if (!/[a-z]/.test(password)) return "Password needs one lowercase letter.";
   if (!/[A-Z]/.test(password)) return "Password needs one uppercase letter.";
   if (!/\d/.test(password)) return "Password needs one number.";
@@ -1193,6 +1258,7 @@ async function loginUser() {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
   const status = document.getElementById("loginStatus");
+  const loginButton = document.getElementById("loginButton");
 
   if (!username || !password) {
     status.className = "status";
@@ -1200,7 +1266,15 @@ async function loginUser() {
     return;
   }
 
+  status.className = "status ok";
+  status.textContent = "Logging in...";
+  loginButton.disabled = true;
+  loginButton.textContent = "Logging in...";
+
   const {ok, data} = await postJSON("/api/login", {username, password});
+
+  loginButton.disabled = false;
+  loginButton.textContent = "Login";
 
   if (!ok) {
     status.className = "status";
@@ -1248,6 +1322,11 @@ function showApp() {
 
 async function connectSocket() {
   if (socket) socket.disconnect();
+
+  if (typeof io !== "function") {
+    showToast("Socket.IO client did not load. Check your internet connection or serve the app from Flask.", false);
+    return;
+  }
 
   if (!await ensureBackend()) {
     showToast("Unable to open realtime chat. Please refresh the page.", false);
@@ -1328,11 +1407,12 @@ async function loadSecurityStatus() {
     }
 
     latestSecurityStatus = await response.json();
+    const debugDbUrl = escapeHTML(apiUrl("/debug-db"));
     summary.innerHTML = `
       <b>Security:</b><br>
       ${escapeHTML(latestSecurityStatus.message_encryption)} storage<br>
       ${escapeHTML(latestSecurityStatus.signature)} signatures<br>
-      <a href="/debug-db" target="_blank">Open database proof</a>
+      <a href="${debugDbUrl}" target="_blank">Open database proof</a>
     `;
   } catch (error) {
     summary.innerHTML = "<b>Security:</b> Status unavailable.";

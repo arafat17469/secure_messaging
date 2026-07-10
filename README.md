@@ -15,7 +15,7 @@ Badri 313 is a secure real-time messaging web application built with Flask, Flas
 - Real-time private messaging with Socket.IO rooms
 - WhatsApp-inspired responsive chat interface
 - User registration and login with bcrypt password hashing
-- Strong password policy with confirmation and show-password controls
+- Configurable password policy with confirmation and show-password controls
 - JWT authentication with issuer, audience, expiry, `jti`, and logout revocation
 - AES-256-GCM encrypted message storage
 - SHA-512 plaintext integrity proof
@@ -117,27 +117,15 @@ http://127.0.0.1:5000
 The app can start in local development even if `.env` is missing. In that case, it creates a local development key at `instance/secret.key`. For a cleaner setup, create `.env` from `.env.example`.
 
 ```env
-SECRET_KEY=replace-this-with-a-long-random-secret
+SECRET_KEY=local-demo-secret-change-before-production
 DATABASE_URL=sqlite:///secure_chat.db
-MAX_LOGIN_ATTEMPTS=5
-LOCK_MINUTES=5
-JWT_EXPIRE_HOURS=6
-JWT_ISSUER=secure-messaging
-JWT_AUDIENCE=secure-messaging-users
-BCRYPT_ROUNDS=10
+
+# Easy local demo mode
 MIN_PASSWORD_LENGTH=8
-PASSWORD_REQUIRE_COMPLEXITY=True
-MAX_MESSAGE_CHARS=2000
-MAX_JSON_BYTES=16384
-RATE_LIMIT_WINDOW_SECONDS=60
-REGISTER_RATE_LIMIT=8
-LOGIN_RATE_LIMIT=12
-MESSAGE_RATE_LIMIT=40
-API_READ_RATE_LIMIT=120
-DEMO_DB_VIEW_ENABLED=True
-CORS_ALLOWED_ORIGINS=http://127.0.0.1:5000,http://localhost:5000,http://127.0.0.1:5001,http://localhost:5001,http://127.0.0.1:5500,http://localhost:5500,null
-HOST=127.0.0.1
-PORT=5000
+PASSWORD_REQUIRE_COMPLEXITY=False
+BCRYPT_ROUNDS=4
+CORS_ALLOWED_ORIGINS=*
+RELAX_SECURITY_HEADERS=True
 FLASK_DEBUG=False
 ```
 
@@ -153,10 +141,10 @@ Session 3: Edge/Firefox              -> User C
 
 Register two users, login from both sessions, select the other user from the sidebar, and send a message. Messages are delivered live through Socket.IO.
 
-Example password that satisfies the default policy:
+Example password that satisfies the default local-demo policy:
 
 ```text
-Secret1!
+abcdef
 ```
 
 ## Database Security View
@@ -260,14 +248,13 @@ You are likely opening the page with VS Code Live Server or as a local file whil
 
 ### Password is rejected
 
-The default policy requires:
+The default local-demo policy requires:
 
-- at least 8 characters
-- one uppercase letter
-- one lowercase letter
-- one number
-- one symbol
+- at least 6 characters
 - password and confirm password must match exactly
+
+Set `PASSWORD_REQUIRE_COMPLEXITY=True`, increase `BCRYPT_ROUNDS`, and set
+`RELAX_SECURITY_HEADERS=False` if you want stricter demo security again.
 
 ### Existing users cannot send after server restart
 

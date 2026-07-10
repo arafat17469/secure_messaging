@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, join_room, emit
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import HTTPException
 
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA512
@@ -82,16 +84,18 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-DEFAULT_CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5000",
-    "http://localhost:5000",
-    "http://127.0.0.1:5001",
-    "http://localhost:5001",
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-    "null"
+LOCAL_DEV_PORTS = (3000, 5000, 5001, 5173, 5500, 5501, 8000, 8080)
+LOCAL_DEV_CONNECT_SOURCES = [
+    source
+    for port in LOCAL_DEV_PORTS
+    for source in (
+        f"http://127.0.0.1:{port}",
+        f"http://localhost:{port}",
+        f"ws://127.0.0.1:{port}",
+        f"ws://localhost:{port}"
+    )
 ]
-CORS_ALLOWED_ORIGINS_ENV = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
+CORS_ALLOWED_ORIGINS_ENV = os.getenv("CORS_ALLOWED_ORIGINS", "*").strip()
 
 if CORS_ALLOWED_ORIGINS_ENV == "*":
     CORS_ALLOWED_ORIGINS = "*"
@@ -102,7 +106,9 @@ elif CORS_ALLOWED_ORIGINS_ENV:
         if origin.strip()
     ]
 else:
-    CORS_ALLOWED_ORIGINS = DEFAULT_CORS_ALLOWED_ORIGINS
+    CORS_ALLOWED_ORIGINS = "*"
+
+CORS_SUPPORTS_CREDENTIALS = CORS_ALLOWED_ORIGINS != "*"
 
 socketio = SocketIO(
     app,
@@ -111,30 +117,31 @@ socketio = SocketIO(
 )
 
 # Apply CORS to all regular Flask routes
-CORS(app, origins=CORS_ALLOWED_ORIGINS, supports_credentials=True)
+CORS(app, origins=CORS_ALLOWED_ORIGINS, supports_credentials=CORS_SUPPORTS_CREDENTIALS)
 
 
 # AES-256 key derived from SECRET_KEY.
 AES_KEY = hashlib.sha256(app.config["SECRET_KEY"].encode("utf-8")).digest()
 
-MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS", 5))
+MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS", 10))
 LOCK_MINUTES = int(os.getenv("LOCK_MINUTES", 5))
 JWT_EXPIRE_HOURS = int(os.getenv("JWT_EXPIRE_HOURS", 6))
 JWT_ISSUER = os.getenv("JWT_ISSUER", "secure-messaging")
 JWT_AUDIENCE = os.getenv("JWT_AUDIENCE", "secure-messaging-users")
-BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", 10))
-MIN_PASSWORD_LENGTH = int(os.getenv("MIN_PASSWORD_LENGTH", 8))
+BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", 8))
+MIN_PASSWORD_LENGTH = int(os.getenv("MIN_PASSWORD_LENGTH", 6))
 PASSWORD_REQUIRE_COMPLEXITY = (
-    os.getenv("PASSWORD_REQUIRE_COMPLEXITY", "True").lower() == "true"
+    os.getenv("PASSWORD_REQUIRE_COMPLEXITY", "False").lower() == "true"
 )
 MAX_MESSAGE_CHARS = int(os.getenv("MAX_MESSAGE_CHARS", 2000))
-MAX_JSON_BYTES = int(os.getenv("MAX_JSON_BYTES", 16384))
+MAX_JSON_BYTES = int(os.getenv("MAX_JSON_BYTES", 262144))
 RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", 60))
-REGISTER_RATE_LIMIT = int(os.getenv("REGISTER_RATE_LIMIT", 8))
-LOGIN_RATE_LIMIT = int(os.getenv("LOGIN_RATE_LIMIT", 12))
-MESSAGE_RATE_LIMIT = int(os.getenv("MESSAGE_RATE_LIMIT", 40))
-API_READ_RATE_LIMIT = int(os.getenv("API_READ_RATE_LIMIT", 120))
+REGISTER_RATE_LIMIT = int(os.getenv("REGISTER_RATE_LIMIT", 100))
+LOGIN_RATE_LIMIT = int(os.getenv("LOGIN_RATE_LIMIT", 100))
+MESSAGE_RATE_LIMIT = int(os.getenv("MESSAGE_RATE_LIMIT", 300))
+API_READ_RATE_LIMIT = int(os.getenv("API_READ_RATE_LIMIT", 600))
 DEMO_DB_VIEW_ENABLED = os.getenv("DEMO_DB_VIEW_ENABLED", "True").lower() == "true"
+RELAX_SECURITY_HEADERS = os.getenv("RELAX_SECURITY_HEADERS", "True").lower() == "true"
 USERNAME_RE = re.compile(r"^[A-Za-z0-9_.-]{3,80}$")
 
 HOST = os.getenv("HOST", "127.0.0.1")
@@ -218,20 +225,47 @@ def reject_large_json_payloads():
 @app.after_request
 def add_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN" if RELAX_SECURITY_HEADERS else "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-    response.headers["Cache-Control"] = "no-store"
-    response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdn.socket.io; "
-        "style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' https://i.pravatar.cc data:; "
-        "connect-src 'self' ws: wss:; "
-        "base-uri 'self'; "
-        "form-action 'self'"
-    )
+    response.headers["Cache-Control"] = "no-cache" if RELAX_SECURITY_HEADERS else "no-store"
+
+    if not RELAX_SECURITY_HEADERS:
+        local_connect_sources = " ".join(LOCAL_DEV_CONNECT_SOURCES)
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.socket.io; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' https://i.pravatar.cc data:; "
+            f"connect-src 'self' {local_connect_sources} ws: wss:; "
+            "base-uri 'self'; "
+            "form-action 'self'"
+        )
+
     return response
+
+
+@app.errorhandler(HTTPException)
+def handle_http_exception(error):
+    if request.path.startswith("/api/"):
+        return jsonify({
+            "error": error.description or error.name
+        }), error.code
+
+    return error
+
+
+@app.errorhandler(Exception)
+def handle_unexpected_exception(error):
+    app.logger.exception("Unhandled application error")
+    db.session.rollback()
+
+    if request.path.startswith("/api/"):
+        return jsonify({
+            "error": "Server error. Check the Flask terminal logs and try again."
+        }), 500
+
+    raise error
 
 
 # ==========================================================
@@ -462,6 +496,23 @@ def decrypt_and_verify_message(message_row: Message):
     return decrypted_text, hash_ok, False, "Digital signature invalid"
 
 
+def message_payload(message_row: Message, direction: str, decrypted: str, hash_ok: bool, signature_ok: bool, status: str):
+    return {
+        "id": message_row.id,
+        "message_uuid": message_row.message_uuid,
+        "direction": direction,
+        "sender": message_row.sender_display,
+        "receiver": message_row.receiver_display,
+        "decrypted_message": decrypted,
+        "encrypted_message": message_row.encrypted_message,
+        "sha512_hash": message_row.plaintext_sha512_hash,
+        "hash_ok": hash_ok,
+        "signature_ok": signature_ok,
+        "status": status,
+        "created_at": message_row.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+
 def is_account_locked(user: User) -> bool:
     if user.locked_until and user.locked_until > datetime.datetime.utcnow():
         return True
@@ -491,7 +542,11 @@ def register_failed_login(user: User):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        min_password_length=MIN_PASSWORD_LENGTH,
+        password_require_complexity=PASSWORD_REQUIRE_COMPLEXITY
+    )
 
 
 @app.route("/debug-db")
@@ -559,8 +614,13 @@ def register():
         rsa_public_key=public_key
     )
 
-    db.session.add(user)
-    db.session.commit()
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        PRIVATE_KEY_STORE.pop(username_hash, None)
+        return jsonify({"error": "User already exists"}), 400
 
     return jsonify({
         "message": "Account created successfully. You can login now."
@@ -580,6 +640,9 @@ def login():
 
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required"}), 400
 
     if is_rate_limited(
         rate_limit_key("login-user", identity_hash(username or client_ip())),
@@ -689,21 +752,9 @@ def inbox():
 
     for m in rows:
         decrypted, hash_ok, signature_ok, status = decrypt_and_verify_message(m)
-
-        messages.append({
-            "id": m.id,
-            "message_uuid": m.message_uuid,
-            "direction": "received",
-            "sender": m.sender_display,
-            "receiver": m.receiver_display,
-            "decrypted_message": decrypted,
-            "encrypted_message": m.encrypted_message,
-            "sha512_hash": m.plaintext_sha512_hash,
-            "hash_ok": hash_ok,
-            "signature_ok": signature_ok,
-            "status": status,
-            "created_at": m.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        })
+        messages.append(
+            message_payload(m, "received", decrypted, hash_ok, signature_ok, status)
+        )
 
     return jsonify({"messages": messages})
 
@@ -730,21 +781,9 @@ def sent():
 
     for m in rows:
         decrypted, hash_ok, signature_ok, status = decrypt_and_verify_message(m)
-
-        messages.append({
-            "id": m.id,
-            "message_uuid": m.message_uuid,
-            "direction": "sent",
-            "sender": m.sender_display,
-            "receiver": m.receiver_display,
-            "decrypted_message": decrypted,
-            "encrypted_message": m.encrypted_message,
-            "sha512_hash": m.plaintext_sha512_hash,
-            "hash_ok": hash_ok,
-            "signature_ok": signature_ok,
-            "status": status,
-            "created_at": m.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        })
+        messages.append(
+            message_payload(m, "sent", decrypted, hash_ok, signature_ok, status)
+        )
 
     return jsonify({"messages": messages})
 
@@ -954,36 +993,12 @@ def socket_send_message(data):
     db.session.commit()
 
     decrypted, hash_ok, signature_ok, status = decrypt_and_verify_message(msg)
-
-    receiver_payload = {
-        "id": msg.id,
-        "message_uuid": msg.message_uuid,
-        "direction": "received",
-        "sender": sender_user.username_display,
-        "receiver": receiver_user.username_display,
-        "decrypted_message": decrypted,
-        "encrypted_message": msg.encrypted_message,
-        "sha512_hash": msg.plaintext_sha512_hash,
-        "hash_ok": hash_ok,
-        "signature_ok": signature_ok,
-        "status": status,
-        "created_at": msg.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    }
-
-    sender_payload = {
-        "id": msg.id,
-        "message_uuid": msg.message_uuid,
-        "direction": "sent",
-        "sender": sender_user.username_display,
-        "receiver": receiver_user.username_display,
-        "decrypted_message": decrypted,
-        "encrypted_message": msg.encrypted_message,
-        "sha512_hash": msg.plaintext_sha512_hash,
-        "hash_ok": hash_ok,
-        "signature_ok": signature_ok,
-        "status": status,
-        "created_at": msg.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    }
+    receiver_payload = message_payload(
+        msg, "received", decrypted, hash_ok, signature_ok, status
+    )
+    sender_payload = message_payload(
+        msg, "sent", decrypted, hash_ok, signature_ok, status
+    )
 
     emit("receive_message", receiver_payload, to=receiver_user.username_display)
     emit("sent_message", sender_payload, to=sender_user.username_display)
